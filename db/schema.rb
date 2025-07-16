@@ -10,13 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_16_030611) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_16_032659) do
   create_table "measurements", force: :cascade do |t|
-    t.float "gestational_age"
-    t.string "measurement_type"
-    t.float "value"
-    t.string "gender"
-    t.float "percentile"
+    t.integer "gestational_age", null: false
+    t.string "gender", null: false
+    t.float "height", null: false
+    t.float "weight", null: false
+    t.float "head_circumference", null: false
+    t.float "height_percentile"
+    t.float "weight_percentile"
+    t.float "hc_percentile"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

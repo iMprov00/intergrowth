@@ -1,83 +1,95 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+  <meta charset="UTF-8">
   <title>Результаты - Intergrowth-21</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    .percentile-value {
-      font-size: 1.2rem;
-      font-weight: bold;
-    }
     .chart-container {
-      height: 500px;
-      margin: 20px 0;
+      height: 400px;
+      margin-bottom: 2rem;
+    }
+    .percentile-card {
+      border-left: 4px solid #0d6efd;
+    }
+    .percentile-value {
+      font-size: 1.5rem;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <div class="container mt-4">
-    <div class="card shadow-sm mb-4">
+  <div class="container py-4">
+    <div class="card shadow mb-4">
       <div class="card-header bg-primary text-white">
         <h1 class="h4 mb-0">Результаты оценки роста плода</h1>
       </div>
+      
       <div class="card-body">
-        <div class="row">
-          <div class="col-md-6">
-            <h5 class="card-title">Параметры измерения</h5>
-            <ul class="list-group list-group-flush mb-3">
-              <li class="list-group-item d-flex justify-content-between">
-                <span>Гестационный возраст:</span>
-                <strong><%= @measurement.gestational_age %> недель</strong>
-              </li>
-              <li class="list-group-item d-flex justify-content-between">
-                <span>Тип измерения:</span>
-                <strong>
-                  <% if @measurement.measurement_type == 'HC' %>
-                    Окружность головы (HC)
-                  <% elsif @measurement.measurement_type == 'BPD' %>
-                    Бипариетальный размер (BPD)
-                  <% elsif @measurement.measurement_type == 'AC' %>
-                    Окружность живота (AC)
-                  <% elsif @measurement.measurement_type == 'FL' %>
-                    Длина бедренной кости (FL)
-                  <% end %>
-                </strong>
-              </li>
-              <li class="list-group-item d-flex justify-content-between">
-                <span>Значение:</span>
-                <strong><%= @measurement.value %> мм</strong>
-              </li>
-            </ul>
-          </div>
-          <div class="col-md-6">
-            <div class="card bg-light">
-              <div class="card-body text-center">
-                <h5 class="card-title">Процентиль</h5>
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <div class="card h-100 percentile-card">
+              <div class="card-body">
+                <h5 class="card-title">Рост плода</h5>
                 <div class="percentile-value text-primary">
-                  <%= @measurement.percentile %>%
+                  <%= @measurement.height_percentile %>%
                 </div>
-                <p class="mt-2 mb-0 text-muted">
-                  <% if @measurement.percentile > 90 %>
-                    Выше 90-го процентиля
-                  <% elsif @measurement.percentile < 10 %>
-                    Ниже 10-го процентиля
-                  <% else %>
-                    Соответствует норме
-                  <% end %>
+                <p class="card-text">
+                  <%= @measurement.height %> мм
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-4">
+            <div class="card h-100 percentile-card">
+              <div class="card-body">
+                <h5 class="card-title">Вес плода</h5>
+                <div class="percentile-value text-primary">
+                  <%= @measurement.weight_percentile %>%
+                </div>
+                <p class="card-text">
+                  <%= @measurement.weight.round(1) %> г
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-4">
+            <div class="card h-100 percentile-card">
+              <div class="card-body">
+                <h5 class="card-title">Окружность головы</h5>
+                <div class="percentile-value text-primary">
+                  <%= @measurement.hc_percentile %>%
+                </div>
+                <p class="card-text">
+                  <%= @measurement.head_circumference %> мм
                 </p>
               </div>
             </div>
           </div>
         </div>
         
+        <h3 class="h5 mb-3">Графики роста</h3>
+        
         <div class="chart-container">
-          <canvas id="growthChart"></canvas>
+          <h4>Рост плода (мм)</h4>
+          <canvas id="heightChart"></canvas>
+        </div>
+<div class="chart-container">
+  <h4>Вес плода (кг)</h4>
+  <canvas id="weightChart"></canvas>
+</div>
+        
+        <div class="chart-container">
+          <h4>Окружность головы (мм)</h4>
+          <canvas id="hcChart"></canvas>
         </div>
         
-        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
           <a href="/" class="btn btn-primary px-4">
-            <i class="bi bi-arrow-left-circle"></i> Новый расчет
+            Новый расчет
           </a>
         </div>
       </div>
@@ -85,54 +97,78 @@
   </div>
 
   <script>
-    const ctx = document.getElementById('growthChart').getContext('2d');
-    const chartData = {
-      labels: <%= @chart_data[:labels].to_json %>,
-      datasets: <%= @chart_data[:datasets].to_json %>
-    };
+    // График роста
+    new Chart(
+      document.getElementById('heightChart'),
+      {
+        type: 'line',
+        data: <%= @height_chart.to_json %>,
+        options: chartOptions('Рост плода (мм)')
+      }
+    );
     
-    new Chart(ctx, {
+  new Chart(
+    document.getElementById('weightChart'),
+    {
       type: 'line',
-      data: chartData,
+      data: <%= @weight_chart.to_json %>,
       options: {
         responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            title: { 
-              display: true, 
-              text: 'Размер (мм)',
-              font: { weight: 'bold' }
-            }
-          },
-          x: {
-            title: { 
-              display: true, 
-              text: 'Гестационный возраст (недели)',
-              font: { weight: 'bold' }
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + ' кг';
+              }
             }
           }
         },
+        scales: {
+          y: {
+            title: { display: true, text: 'Вес (кг)' }
+          }
+        }
+      }
+    }
+  );
+    
+    // График окружности головы
+    new Chart(
+      document.getElementById('hcChart'),
+      {
+        type: 'line',
+        data: <%= @hc_chart.to_json %>,
+        options: chartOptions('Окружность головы (мм)')
+      }
+    );
+    
+    function chartOptions(title) {
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
         plugins: {
-          legend: {
-            position: 'top',
-            labels: {
-              font: { size: 12 }
-            }
+          title: {
+            display: true,
+            text: title
           },
           tooltip: {
             callbacks: {
               label: function(context) {
-                return context.dataset.label + ': ' + context.parsed.y + ' мм';
+                return `${context.dataset.label}: ${context.parsed.y.toFixed(1)}`;
               }
             }
           }
+        },
+        scales: {
+          x: {
+            title: { display: true, text: 'Гестационный возраст' }
+          },
+          y: {
+            title: { display: true, text: 'Значение' }
+          }
         }
-      }
-    });
+      };
+    }
   </script>
-
-  <!-- Иконки Bootstrap -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
 </body>
 </html>

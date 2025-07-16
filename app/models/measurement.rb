@@ -1,11 +1,6 @@
 class Measurement < ActiveRecord::Base
-  # Поля:
-  # gestational_age - гестационный возраст в неделях
-  # measurement_type (HC, BPD, AC, FL)
-  # value - значение измерения в мм
-  # gender - пол плода (M/F)
-  # percentile - рассчитанный процентиль
-  
-  validates :gestational_age, presence: true, numericality: { greater_than: 0 }
-  validates :value, presence: true, numericality: { greater_than: 0 }
+  # Конвертация единиц измерения
+  def height_cm = height.to_f / 10.0
+  def weight_kg = weight.to_f / 1000.0
+  def head_circumference_cm = head_circumference.to_f / 10.0
 end
