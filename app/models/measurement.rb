@@ -1,6 +1,10 @@
 class Measurement < ActiveRecord::Base
-  # Конвертация единиц измерения
-  def height_cm = height.to_f / 10.0
-  def weight_kg = weight.to_f / 1000.0
-  def head_circumference_cm = head_circumference.to_f / 10.0
+  validates :gestational_weeks, presence: true, numericality: { in: 24..42 }
+  validates :gestational_days, presence: true, numericality: { in: 0..6 }
+  validates :gender, presence: true, inclusion: { in: %w[M F] }
+  validates :height, :weight, :head_circumference, numericality: { greater_than: 0 }
+  
+  def gestational_age
+    "#{gestational_weeks}+#{gestational_days}"
+  end
 end

@@ -2,96 +2,196 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Калькулятор Intergrowth-21</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Калькулятор роста плода INTERGROWTH-21st</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
   <style>
+    body {
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      min-height: 100vh;
+      padding-top: 2rem;
+      padding-bottom: 2rem;
+    }
+    .card-header {
+      background: linear-gradient(135deg, #3f87a6, #ebf8e1);
+      font-weight: 600;
+    }
     .form-section {
+      background: white;
+      border-radius: 10px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
       margin-bottom: 1.5rem;
     }
-    .unit {
-      font-size: 0.9rem;
-      color: #6c757d;
+    .btn-calculate {
+      background: linear-gradient(135deg, #4caf50, #2e7d32);
+      border: none;
+      padding: 0.75rem 2rem;
+      font-size: 1.1rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    .btn-calculate:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .input-group-text {
+      background: #e9ecef;
+      min-width: 100px;
+      justify-content: center;
+    }
+    .gender-btn.active {
+      background: #4caf50;
+      color: white;
+      border-color: #4caf50;
+    }
+    .week-btn.active {
+      background: #2196f3;
+      color: white;
+      border-color: #2196f3;
+    }
+    .day-btn.active {
+      background: #ff9800;
+      color: white;
+      border-color: #ff9800;
     }
   </style>
 </head>
 <body>
-  <div class="container py-4">
-    <div class="card shadow">
-      <div class="card-header bg-primary text-white">
-        <h1 class="h4 mb-0">Калькулятор роста плода Intergrowth-21</h1>
-      </div>
-      
-      <div class="card-body">
-        <% if @errors %>
-          <div class="alert alert-danger">
-            <ul class="mb-0">
-              <% @errors.each do |error| %>
-                <li><%= error %></li>
-              <% end %>
-            </ul>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="card shadow-lg">
+          <div class="card-header text-white text-center py-3">
+            <h2><i class="bi bi-graph-up"></i> Калькулятор роста плода INTERGROWTH-21st</h2>
           </div>
-        <% end %>
+          <div class="card-body p-4">
+            <form action="/calculate" method="post">
+              <!-- Параметры беременности -->
+              <div class="form-section">
+                <h4 class="mb-4 border-bottom pb-2"><i class="bi bi-calendar-heart"></i> Параметры беременности</h4>
+                
+                <div class="row mb-4">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold">Пол плода:</label>
+                    <div class="btn-group w-100" role="group">
+                      <button type="button" class="btn btn-outline-primary gender-btn active w-50" data-value="M">
+                        <i class="bi bi-gender-male"></i> Мужской
+                      </button>
+                      <button type="button" class="btn btn-outline-primary gender-btn w-50" data-value="F">
+                        <i class="bi bi-gender-female"></i> Женский
+                      </button>
+                      <input type="hidden" name="gender" value="M" id="genderInput">
+                    </div>
+                  </div>
+                  
+                  <div class="col-md-6">
+                    <label class="form-label fw-bold">Гестационный возраст:</label>
+                    <div class="d-flex">
+                      <div class="me-2 flex-grow-1">
+                        <label class="form-label small">Недели</label>
+                        <div class="btn-group flex-wrap" role="group">
+                          <% (24..42).each do |week| %>
+                            <button type="button" class="btn btn-outline-primary week-btn <%= 'active' if week == 33 %>" data-value="<%= week %>">
+                              <%= week %>
+                            </button>
+                          <% end %>
+                        </div>
+                        <input type="hidden" name="gestational_weeks" value="33" id="weeksInput">
+                      </div>
+                      
+                      <div class="ms-2">
+                        <label class="form-label small">Дни</label>
+                        <div class="btn-group" role="group">
+                          <% (0..6).each do |day| %>
+                            <button type="button" class="btn btn-outline-primary day-btn <%= 'active' if day == 0 %>" data-value="<%= day %>">
+                              <%= day %>
+                            </button>
+                          <% end %>
+                        </div>
+                        <input type="hidden" name="gestational_days" value="0" id="daysInput">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Антропометрические данные -->
+              <div class="form-section">
+                <h4 class="mb-4 border-bottom pb-2"><i class="bi bi-rulers"></i> Антропометрические данные</h4>
+                
+                <div class="row">
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label fw-bold">Рост плода (см)</label>
+                    <div class="input-group">
+                      <input type="number" step="0.1" class="form-control form-control-lg" name="height" placeholder="48.5" required>
+                      <span class="input-group-text bg-light">см</span>
+                    </div>
+                  </div>
+                  
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label fw-bold">Вес плода (кг)</label>
+                    <div class="input-group">
+                      <input type="number" step="0.01" class="form-control form-control-lg" name="weight" placeholder="2.85" required>
+                      <span class="input-group-text bg-light">кг</span>
+                    </div>
+                  </div>
+                  
+                  <div class="col-md-4 mb-3">
+                    <label class="form-label fw-bold">Окружность головы (см)</label>
+                    <div class="input-group">
+                      <input type="number" step="0.1" class="form-control form-control-lg" name="head_circumference" placeholder="33.2" required>
+                      <span class="input-group-text bg-light">см</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="text-center mt-4">
+                <button type="submit" class="btn btn-calculate btn-lg text-white">
+                  <i class="bi bi-calculator"></i> Рассчитать показатели
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
         
-        <form action="/calculate" method="post">
-          <div class="row form-section">
-            <div class="col-md-6">
-              <label class="form-label">Гестационный возраст</label>
-              <div class="input-group">
-                <input type="number" class="form-control" name="gestational_age" required min="140" max="280" value="<%= params[:gestational_age] || 140 %>">
-                <span class="input-group-text">дней</span>
-              </div>
-              <div class="form-text">От 140 (20 недель) до 280 дней (40 недель)</div>
-            </div>
-            
-            <div class="col-md-6">
-              <label class="form-label">Пол плода</label>
-              <div class="d-flex gap-3">
-                <div class="form-check">
-                  <input class="form-check-input" type="radio" name="gender" value="M" id="genderMale" <%= 'checked' if (params[:gender] || 'M') == 'M' %>>
-                  <label class="form-check-label" for="genderMale">Мужской</label>
-                </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="radio" name="gender" value="F" id="genderFemale" <%= 'checked' if params[:gender] == 'F' %>>
-                  <label class="form-check-label" for="genderFemale">Женский</label>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-<div class="row form-section">
-  <div class="col-md-4">
-    <label class="form-label">Рост плода</label>
-    <div class="input-group">
-      <input type="number" step="0.1" class="form-control" name="height" required value="<%= params[:height] %>">
-      <span class="input-group-text">см</span>
-    </div>
-  </div>
-  
-  <div class="col-md-4">
-    <label class="form-label">Вес плода</label>
-    <div class="input-group">
-      <input type="number" step="0.01" class="form-control" name="weight" required value="<%= params[:weight] %>">
-      <span class="input-group-text">кг</span>
-    </div>
-  </div>
-  
-  <div class="col-md-4">
-    <label class="form-label">Окружность головы</label>
-    <div class="input-group">
-      <input type="number" step="0.1" class="form-control" name="head_circumference" required value="<%= params[:head_circumference] %>">
-      <span class="input-group-text">см</span>
-    </div>
-  </div>
-</div>
-          
-          <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
-            <button type="submit" class="btn btn-primary px-4">
-              Рассчитать
-            </button>
-          </div>
-        </form>
+        <div class="mt-4 text-center text-muted">
+          <p>© 2025 Оксфордский университет | INTERGROWTH-21st Project</p>
+          <p class="small">Используются международные стандарты роста плода и новорожденных</p>
+        </div>
       </div>
     </div>
   </div>
+
+  <script>
+    // Активация кнопок выбора пола
+    document.querySelectorAll('.gender-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        document.getElementById('genderInput').value = this.dataset.value;
+      });
+    });
+    
+    // Активация кнопок выбора недель
+    document.querySelectorAll('.week-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.week-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        document.getElementById('weeksInput').value = this.dataset.value;
+      });
+    });
+    
+    // Активация кнопок выбора дней
+    document.querySelectorAll('.day-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        document.getElementById('daysInput').value = this.dataset.value;
+      });
+    });
+  </script>
 </body>
 </html>
