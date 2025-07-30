@@ -15,7 +15,7 @@
               <div class="card-body text-center">
                 <h5 class="card-title text-muted">Гестационный возраст</h5>
                 <div class="display-5 fw-bold text-primary">
-                  <%= @measurement.gestational_weeks %>+<%= @measurement.gestational_days %> нед.
+                  <font color="#54c654"><%= @measurement.gestational_weeks %>+<%= @measurement.gestational_days %> нед.</font>
                 </div>
                 <div class="mt-2">
                   <span class="badge" style="background-color: <%= @measurement.gender == 'M' ? '#0d6efd' : '#ff66b3' %>">
@@ -76,7 +76,7 @@
           <div class="col-12 mb-4">
             <div class="card">
               <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                <span>Вес плода (кг)</span>
+                <span><font color="black">Вес плода (кг)</font></span>
                 <div>
                   <span class="badge bg-success">Процентиль: <%= @measurement.weight_percentile.round(1) %>%</span>
                 </div>
@@ -91,7 +91,7 @@
           <div class="col-12 mb-4">
             <div class="card">
               <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                <span>Рост плода (см)</span>
+                <span><font color="black">Рост плода (см)</font></span>
                 <div>
                   <span class="badge bg-success">Процентиль: <%= @measurement.height_percentile.round(1) %>%</span>
                 </div>
@@ -106,7 +106,7 @@
           <div class="col-12 mb-4">
             <div class="card">
               <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                <span>Окружность головы (см)</span>
+                <span><font color="black">Окружность головы (см)</font></span>
                 <div>
                   <span class="badge bg-success">Процентиль: <%= @measurement.hc_percentile.round(1) %>%</span>
                 </div>
