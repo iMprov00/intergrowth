@@ -1,316 +1,258 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Результаты оценки роста плода</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-  <style>
-    body {
-      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-      padding-top: 2rem;
-      padding-bottom: 2rem;
-    }
-    .card {
-      border-radius: 15px;
-      overflow: hidden;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-      margin-bottom: 2rem;
-      border: none;
-    }
-    .card-header {
-      background: linear-gradient(135deg, #3f87a6, #2c3e50);
-      color: white;
-      font-weight: 600;
-      padding: 1.2rem 1.5rem;
-    }
-    .result-card {
-      border-left: 4px solid #4caf50;
-      border-radius: 8px;
-      transition: transform 0.3s ease;
-    }
-    .result-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-    }
-    .chart-container {
-      height: 1000px;
-      background: white;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      margin-bottom: 2rem;
-    }
-    .chart-header {
-      font-size: 1.4rem;
-      font-weight: 600;
-      color: #2c3e50;
-      margin-bottom: 1.5rem;
-      border-bottom: 2px solid #eee;
-      padding-bottom: 0.5rem;
-    }
-    .percentile-value {
-      font-size: 2.2rem;
-      font-weight: 700;
-      color: #3f87a6;
-    }
-    .btn-back {
-      background: linear-gradient(135deg, #2196f3, #0d47a1);
-      border: none;
-      padding: 0.8rem 2.5rem;
-      font-size: 1.1rem;
-      font-weight: 500;
-      transition: all 0.3s ease;
-    }
-    .btn-back:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(33, 150, 243, 0.25);
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-lg-12">
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="mb-0"><i class="bi bi-graph-up-arrow"></i> Результаты оценки роста плода</h3>
-            <span class="badge bg-light text-dark fs-6">INTERGROWTH-21st</span>
+<% @title = "Результаты оценки роста плода" %>
+
+<div class="row justify-content-center">
+  <div class="col-lg-12">
+    <div class="card shadow-sm mb-4 border-0">
+      <div class="card-header bg-main text-white rounded-top d-flex justify-content-between align-items-center">
+        <h4 class="mb-0"><font color="white"><i class="bi bi-graph-up-arrow me-2"></i></font><font color="white">Результаты оценки роста плода</font></h4>
+      </div>
+      
+      <div class="card-body">
+        <!-- Сводные результаты -->
+        <div class="row mb-4">
+          <div class="col-md-4 mb-3">
+            <div class="card h-100">
+              <div class="card-body text-center">
+                <h5 class="card-title text-muted">Гестационный возраст</h5>
+                <div class="display-5 fw-bold text-primary">
+                  <%= @measurement.gestational_weeks %>+<%= @measurement.gestational_days %> нед.
+                </div>
+                <div class="mt-2">
+                  <span class="badge" style="background-color: <%= @measurement.gender == 'M' ? '#0d6efd' : '#ff66b3' %>">
+                    <%= @measurement.gender == 'M' ? 'Мужской' : 'Женский' %>
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
           
-          <div class="card-body p-4">
-            <!-- Сводные результаты -->
-            <div class="row mb-5">
-              <div class="col-md-4 mb-4">
-                <div class="card result-card h-100">
-                  <div class="card-body text-center">
-                    <h5 class="card-title text-muted">Гестационный возраст</h5>
-                    <div class="display-5 fw-bold text-primary">
-                      <%= @measurement.gestational_weeks %>+<%= @measurement.gestational_days %> нед.
-                    </div>
-                    <div class="mt-2">
-                      <span class="badge bg-<%= @measurement.gender == 'M' ? 'primary' : 'danger' %> fs-6">
-                        <%= @measurement.gender == 'M' ? 'Мужской' : 'Женский' %>
-                      </span>
-                    </div>
-                  </div>
+          <div class="col-md-4 mb-3">
+            <div class="card h-100">
+              <div class="card-body">
+                <h5 class="card-title text-muted border-bottom pb-2">Параметры</h5>
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Рост:</span>
+                  <strong><%= @measurement.height %> см</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Вес:</span>
+                  <strong><%= @measurement.weight %> кг</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <span>Окружность головы:</span>
+                  <strong><%= @measurement.head_circumference %> см</strong>
                 </div>
               </div>
-              
-              <div class="col-md-4 mb-4">
-                <div class="card result-card h-100">
-                  <div class="card-body">
-                    <h5 class="card-title text-muted border-bottom pb-2">Параметры</h5>
-                    <div class="d-flex justify-content-between mb-2">
-                      <span>Рост:</span>
-                      <strong><%= @measurement.height %> см</strong>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                      <span>Вес:</span>
-                      <strong><%= @measurement.weight %> кг</strong>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                      <span>Окружность головы:</span>
-                      <strong><%= @measurement.head_circumference %> см</strong>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div class="col-md-4 mb-4">
-                <div class="card result-card h-100">
-                  <div class="card-body text-center">
-                    <h5 class="card-title text-muted">Общая оценка</h5>
-                    <% avg_percentile = (@measurement.height_percentile + @measurement.weight_percentile + @measurement.hc_percentile) / 3 %>
-                    <div class="percentile-value"><%= avg_percentile.round(1) %>%</div>
-                    <div class="mt-2">
-                      <% if avg_percentile > 90 %>
-                        <span class="badge bg-success fs-6">Выше среднего</span>
-                      <% elsif avg_percentile < 10 %>
-                        <span class="badge bg-warning fs-6">Ниже среднего</span>
-                      <% else %>
-                        <span class="badge bg-info fs-6">Соответствует норме</span>
-                      <% end %>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Графики роста -->
-            <div class="row">
-              <div class="col-12">
-                <h4 class="mb-4 border-bottom pb-2"><i class="bi bi-bar-chart-line"></i> Графики роста плода</h4>
-              </div>
-              
-              <!-- График веса -->
-              <div class="col-12 mb-5">
-                <div class="chart-container">
-                  <div class="chart-header d-flex justify-content-between align-items-center">
-                    <span>Вес плода (кг)</span>
-                    <div>
-                      <span class="badge bg-primary me-2">Z-скор: <%= @measurement.weight_z.round(2) %></span>
-                      <span class="badge bg-success">Процентиль: <%= @measurement.weight_percentile.round(1) %>%</span>
-                    </div>
-                  </div>
-                  <canvas id="weightChart"></canvas>
-                </div>
-              </div>
-              
-              <!-- График роста -->
-              <div class="col-12 mb-5">
-                <div class="chart-container">
-                  <div class="chart-header d-flex justify-content-between align-items-center">
-                    <span>Рост плода (см)</span>
-                    <div>
-                      <span class="badge bg-primary me-2">Z-скор: <%= @measurement.height_z.round(2) %></span>
-                      <span class="badge bg-success">Процентиль: <%= @measurement.height_percentile.round(1) %>%</span>
-                    </div>
-                  </div>
-                  <canvas id="heightChart"></canvas>
-                </div>
-              </div>
-              
-              <!-- График окружности головы -->
-              <div class="col-12 mb-5">
-                <div class="chart-container">
-                  <div class="chart-header d-flex justify-content-between align-items-center">
-                    <span>Окружность головы (см)</span>
-                    <div>
-                      <span class="badge bg-primary me-2">Z-скор: <%= @measurement.hc_z.round(2) %></span>
-                      <span class="badge bg-success">Процентиль: <%= @measurement.hc_percentile.round(1) %>%</span>
-                    </div>
-                  </div>
-                  <canvas id="hcChart"></canvas>
-                </div>
-              </div>
-            </div>
-            
-            <div class="text-center mt-4">
-              <a href="/" class="btn btn-back btn-lg text-white">
-                <i class="bi bi-arrow-left-circle"></i> Новый расчет
-              </a>
             </div>
           </div>
+          
+          <div class="col-md-4 mb-3">
+            <div class="card h-100">
+              <div class="card-body text-center">
+                <h5 class="card-title text-muted">Общая оценка</h5>
+                <% avg_percentile = (@measurement.height_percentile + @measurement.weight_percentile + @measurement.hc_percentile) / 3 %>
+                <div class="display-4 fw-bold"> <font color="#54c654"><%= avg_percentile.round(1) %>%</font></div>
+                <div class="mt-2" >
+                  <% if avg_percentile > 90 %>
+                    <span class="badge bg-success">Выше среднего</span>
+                  <% elsif avg_percentile < 10 %>
+                    <span class="badge bg-warning">Ниже среднего</span>
+                  <% else %>
+                    <span class="badge" style="background-color: #54c654;">Соответствует норме</span>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Графики роста -->
+        <div class="row">
+          <div class="col-12">
+            <h5 class="mb-3"><i class="bi bi-bar-chart-line me-2"></i>Графики роста плода</h5>
+          </div>
+          
+          <!-- График веса -->
+          <div class="col-12 mb-4">
+            <div class="card">
+              <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <span>Вес плода (кг)</span>
+                <div>
+                  <span class="badge bg-success">Процентиль: <%= @measurement.weight_percentile.round(1) %>%</span>
+                </div>
+              </div>
+              <div class="card-body">
+                <canvas id="weightChart" height="300"></canvas>
+              </div>
+            </div>
+          </div>
+          
+          <!-- График роста -->
+          <div class="col-12 mb-4">
+            <div class="card">
+              <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <span>Рост плода (см)</span>
+                <div>
+                  <span class="badge bg-success">Процентиль: <%= @measurement.height_percentile.round(1) %>%</span>
+                </div>
+              </div>
+              <div class="card-body">
+                <canvas id="heightChart" height="300"></canvas>
+              </div>
+            </div>
+          </div>
+          
+          <!-- График окружности головы -->
+          <div class="col-12 mb-4">
+            <div class="card">
+              <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <span>Окружность головы (см)</span>
+                <div>
+                  <span class="badge bg-success">Процентиль: <%= @measurement.hc_percentile.round(1) %>%</span>
+                </div>
+              </div>
+              <div class="card-body">
+                <canvas id="hcChart" height="300"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="text-center mt-4">
+          <a href="/" class="btn btn-main">
+            <i class="bi bi-arrow-left-circle me-2"></i> Новый расчет
+          </a>
         </div>
       </div>
     </div>
   </div>
+</div>
+<script>
 
-  <script>
-    // Регистрируем плагин
-    Chart.register(ChartDataLabels);
-    
-    // Общие настройки для графиков
-    const chartOptions = (title) => ({
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        datalabels: {
-          display: true,
-          align: 'end',
-          anchor: 'end',
-          color: (ctx) => ctx.dataset.borderColor,
-          backgroundColor: 'white',
-          borderColor: (ctx) => ctx.dataset.borderColor,
-          borderWidth: 1,
-          borderRadius: 4,
-          font: {
-            weight: 'bold',
-            size: 12
-          },
-          padding: {
-            top: 4,
-            bottom: 4,
-            left: 8,
-            right: 8
-          },
-          formatter: (value, ctx) => {
-            const datasetLabel = ctx.dataset.label;
-            return datasetLabel === 'P50' ? `${value.toFixed(2)}\n${datasetLabel}` : datasetLabel;
-          }
-        },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}`;
+  // Общие настройки для графиков
+  const chartOptions = (title, unit) => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      datalabels: {
+        display: false
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            let label = context.dataset.label || '';
+            if (label) {
+              label += ': ';
             }
-          }
-        },
-        legend: {
-          position: 'top',
-          labels: {
-            font: { size: 13 },
-            usePointStyle: true,
-            padding: 20
+            if (context.parsed.y !== null) {
+              label += unit === 'кг' ? 
+                context.parsed.y.toFixed(2) + ' кг' : 
+                context.parsed.y.toFixed(1) + ' см';
+            }
+            return label;
           }
         }
       },
-      scales: {
-        x: {
-          title: {
-            display: true,
-            text: 'Гестационный возраст (недели)',
-            font: { size: 14, weight: 'bold' }
-          },
-          grid: { display: false }
-        },
-        y: {
-          title: {
-            display: true,
-            text: title,
-            font: { size: 14, weight: 'bold' }
-          },
-          grid: { color: 'rgba(0,0,0,0.05)' }
-        }
-      },
-      elements: {
-        point: {
-          radius: 0,
-          hoverRadius: 6
-        },
-        line: {
-          borderWidth: 2,
-          tension: 0.1
+      legend: {
+        position: 'top',
+        labels: {
+          font: { size: 13 },
+          usePointStyle: true,
+          padding: 20,
+          generateLabels: function(chart) {
+            const datasets = chart.data.datasets;
+            return datasets.map(function(dataset, i) {
+              return {
+                text: dataset.label,
+                fillStyle: dataset.borderColor,
+                strokeStyle: dataset.borderColor,
+                lineWidth: dataset.borderWidth,
+                pointStyle: dataset.pointRadius > 0 ? 'circle' : 'line',
+                hidden: !chart.isDatasetVisible(i)
+              };
+            }).filter(function(label, i) {
+              return ;
+            });
+          }
         }
       }
-    });
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Гестационный возраст (недели)',
+          font: { size: 14, weight: 'bold' }
+        },
+        grid: { display: false }
+      },
+      y: {
+        title: {
+          display: true,
+          text: title + (unit ? ` (${unit})` : ''),
+          font: { size: 14, weight: 'bold' }
+        },
+        min: function(context) {
+          const min = Math.min(...context.chart.data.datasets
+            .flatMap(d => d.data.filter(v => v !== null)));
+          return unit === 'кг' ? Math.max(0, min * 0.9) : Math.max(30, min * 0.95);
+        },
+        max: function(context) {
+          const max = Math.max(...context.chart.data.datasets
+            .flatMap(d => d.data.filter(v => v !== null)));
+          return unit === 'кг' ? max * 1.1 : max * 1.05;
+        },
+        grid: { color: 'rgba(0,0,0,0.05)' }
+      }
+    },
+    elements: {
+      point: {
+        radius: function(context) {
+          return context.dataset.label === 'Ваш ребенок' ? 8 : 0;
+        },
+        hoverRadius: function(context) {
+          return context.dataset.label === 'Ваш ребенок' ? 12 : 6;
+        }
+      },
+      line: {
+        borderWidth: function(context) {
+          return context.dataset.label === 'P50' ? 3 : 1;
+        },
+        tension: 0
+      }
+    }
+  });
+
+  // Инициализация графиков
+  document.addEventListener('DOMContentLoaded', function() {
+    // График веса
+    new Chart(
+      document.getElementById('weightChart'),
+      {
+        type: 'line',
+        data: <%= @weight_chart.to_json %>,
+        options: chartOptions('Вес плода', 'кг')
+      }
+    );
     
-    // Инициализация графиков
-    document.addEventListener('DOMContentLoaded', function() {
-      // График веса
-      new Chart(
-        document.getElementById('weightChart'),
-        {
-          type: 'line',
-          data: <%= @weight_chart.to_json %>,
-          options: chartOptions('Вес (кг)')
-        }
-      );
-      
-      // График роста
-      new Chart(
-        document.getElementById('heightChart'),
-        {
-          type: 'line',
-          data: <%= @height_chart.to_json %>,
-          options: chartOptions('Рост (см)')
-        }
-      );
-      
-      // График окружности головы
-      new Chart(
-        document.getElementById('hcChart'),
-        {
-          type: 'line',
-          data: <%= @hc_chart.to_json %>,
-          options: chartOptions('Окружность головы (см)')
-        }
-      );
-    });
-  </script>
-</body>
-</html>
+    // График роста
+    new Chart(
+      document.getElementById('heightChart'),
+      {
+        type: 'line',
+        data: <%= @height_chart.to_json %>,
+        options: chartOptions('Рост плода', 'см')
+      }
+    );
+    
+    // График окружности головы
+    new Chart(
+      document.getElementById('hcChart'),
+      {
+        type: 'line',
+        data: <%= @hc_chart.to_json %>,
+        options: chartOptions('Окружность головы', 'см')
+      }
+    );
+  });
+</script>

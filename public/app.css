@@ -1,0 +1,309 @@
+/* ====================== */
+/* Глобальные переменные цветов */
+:root {
+  --main-color: #54c654;
+  --main-color-dark: #3a8a3a;
+  --main-color-light: #e8f5e9;
+  --main-color-border: #4ab84a;
+  --secondary-color: #6c757d;
+  --info-color: #17a2b8;
+  --primary-color: #007bff;
+  --danger-color: #dc3545;
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
+  --text-color: #333;
+  --text-light: #fff;
+  --bg-light: #f8f9fa;
+  --black-color: black;
+  --gray-color: gray;
+}
+
+/* ====================== */
+/* Основные стили страницы */
+/* ====================== */
+body {
+  font-family: 'Jost', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg-light);
+  color: var(--text-color);
+  padding-top: 20px;
+  line-height: 1.6;
+}
+
+/* ====================== */
+/* Навигационная панель */
+/* ====================== */
+.navbar-main {
+  background-color: var(--main-color);
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  padding: 0.75rem 1rem;
+}
+
+.navbar-logo {
+  height: 40px;
+  transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover .navbar-logo {
+  transform: rotate(-5deg) scale(1.1);
+}
+
+.navbar-brand-text {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--text-light);
+  font-size: 1.1rem;
+}
+
+.navbar-links .nav-link {
+  color: var(--text-light);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  margin: 0 3px;
+}
+
+.navbar-links .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.navbar-links .nav-link.active {
+  background-color: rgba(255, 255, 255, 0.3);
+  font-weight: 600;
+}
+
+/* ====================== */
+/* Карточки */
+/* ====================== */
+/* ====================== */
+/* Исправление для карточек */
+/* ====================== */
+/* ====================== */
+/* Анимации и переходы */
+/* ====================== */
+.card {
+  border: 2px solid rgba(0,0,0,0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: 
+    transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
+    box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
+    border-color 0.3s ease;
+  margin-bottom: 25px;
+  overflow: hidden;
+  background-color: white;
+  will-change: transform, box-shadow; /* Оптимизация для браузера */
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+  border-bottom: none;
+  padding: 1.25rem 1.5rem;
+  color: white;
+  background-color: var(--main-color);
+}
+
+.card-header {
+  border-bottom: 2px solid rgba(0,0,0,0.1) !important;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+/* ====================== */
+/* Формы и элементы ввода */
+/* ====================== */
+.form-label {
+  font-weight: 500;
+  color: var(--dark-color);
+  margin-bottom: 0.5rem;
+}
+
+.form-control, .form-select {
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--main-color);
+  box-shadow: 0 0 0 0.2rem rgba(84, 198, 84, 0.2);
+  outline: none;
+}
+
+.input-group-text {
+  background-color: var(--main-color-light);
+  color: var(--main-color-dark);
+  border: 1px solid #e0e0e0;
+  font-weight: 500;
+}
+
+/* ====================== */
+/* Кнопки (полная переработка) */
+/* ====================== */
+
+.btn {
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  border-radius: 8px !important; /* Важно переопределить Bootstrap */
+  padding: 0.6rem 1.5rem;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid transparent !important; /* Единый стиль границ */
+}
+
+.btn i {
+  margin-right: 8px;
+  margin: 0.25rem;
+}
+
+/* Основная кнопка */
+.btn-main {
+  background-color: var(--main-color);
+  color: white;
+  border-color: var(--main-color-dark) !important;
+}
+
+.btn-main:hover {
+  background-color: var(--main-color-dark);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(84, 198, 84, 0.3);
+}
+
+/* Контурные кнопки */
+.btn-outline-primary {
+  border: 2px solid var(--main-color-light) !important;
+  color: var(--black-color);
+  background-color: transparent;
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--main-color);
+  color: white;
+  border-color: var(--main-color-dark) !important;
+}
+
+/* Активные кнопки в группах */
+.gender-btn.active, 
+.week-btn.active, 
+.day-btn.active {
+  background-color: var(--main-color) !important;
+  color: white !important;
+  border-color: var(--main-color-dark) !important;
+}
+
+/* ====================== */
+/* Формы и элементы ввода */
+/* ====================== */
+.form-control, .form-select {
+  border-radius: 8px !important;
+  padding: 0.6rem 1rem;
+  border: 2px solid #e0e0e0 !important;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--main-color) !important;
+  box-shadow: 0 0 0 0.2rem rgba(84, 198, 84, 0.2) !important;
+  outline: none;
+}
+
+.input-group-text {
+  background-color: var(--main-color-light);
+  color: var(--main-color-dark);
+  border: 2px solid #e0e0e0 !important;
+  font-weight: 500;
+}
+
+/* ====================== */
+/* Заголовки */
+/* ====================== */
+h4, h5 {
+  color: var(--dark-color);
+  font-weight: 600;
+}
+
+h5 {
+  color: var(--main-color-dark);
+  display: flex;
+  align-items: center;
+}
+
+h5 i {
+  margin-right: 10px;
+  color: var(--main-color);
+}
+
+/* ====================== */
+/* Адаптивность */
+/* ====================== */
+@media (max-width: 992px) {
+  .navbar-links {
+    width: 100%;
+    margin-top: 1rem;
+  }
+  
+  .navbar-links .nav-link {
+    margin: 0.25rem 0;
+    width: 100%;
+    text-align: center;
+  }
+btn-group {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  border: 2px solid var(--main-color);
+    gap: 4px; /* Добавляем промежуток между кнопками в группе */
+  padding: 4px; /* Отступ внутри группы */
+}
+
+.btn-group .btn {
+  border-radius: 0 !important;
+  margin: 0 !important; /* Убираем margin для кнопок в группе */
+  border-right: 1px solid var(--main-color) !important;
+  border-left: 1px solid var(--main-color) !important;
+
+}
+
+/* Стили для группы кнопок недель */
+.week-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px; /* Расстояние между кнопками */
+  margin-bottom: 8px;
+}
+
+/* Стили для группы кнопок дней */
+.day-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.btn-group .btn:first-child {
+  border-left: none !important;
+}
+
+.btn-group .btn:last-child {
+  border-right: none !important;
+}
+
+@media (max-width: 768px) {
+  .card-body {
+    padding: 1.25rem;
+  }
+}
