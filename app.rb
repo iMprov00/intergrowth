@@ -147,7 +147,8 @@ post '/calculate' do
   
   # Получаем параметры из формы
   height = params[:height].to_f
-  weight = params[:weight].to_f
+  weight_grams = params[:weight].to_f  # Получаем вес в граммах
+  weight = weight_grams / 1000.0      # Конвертируем в килограммы
   hc = params[:head_circumference].to_f
 
   # Получаем медианные значения с учетом дней
