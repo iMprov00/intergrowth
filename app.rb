@@ -192,33 +192,31 @@ end
 helpers do
   def physical_development_assessment(weight, weight_percentile, height_percentile)
     if weight >= 5000
-      { category: "5. Чрезмерно крупный к сроку гестации", 
-        message: "Вес выше 5000 кг!", 
+      { category: "5. Гигантский к сроку гестации", 
         alert: "danger" }
     elsif weight >= 4500
-      { category: "4. Крупный к сроку гестации", 
-        message: "Вес выше 4500 кг!", 
+      { category: "4. Черезмерно крупныц к сроку гестации", 
         alert: "danger" }
     elsif weight_percentile >= 97 && height_percentile >= 10
-      { category: "3. Крупный к сроку гестации", 
+      { category: "3. Высокое, крупный к сроку гестации", 
         alert: "danger" }
     elsif weight_percentile >= 90 && weight_percentile < 97 && height_percentile >= 10
-      { category: "2. Выше среднего", 
+      { category: "2. Выше среднего, крупный к сроку гестации", 
         alert: "warning" }
     elsif weight_percentile >= 10 && weight_percentile < 90 && height_percentile >= 10
       { category: "1. Среднее", 
         alert: "success" }
     elsif weight_percentile >= 3 && weight_percentile < 10 && height_percentile >= 10
-      { category: "6. Ниже среднего", 
+      { category: "6. Ниже среднего, маловесный к сроку гестации", 
         alert: "warning" }
     elsif weight_percentile >= 3 && weight_percentile < 10 && height_percentile < 10
-      { category: "7. Малый к сроку гестации", 
+      { category: "7. Ниже среднего, малый к сроку гестации", 
         alert: "danger" }
     elsif weight_percentile < 3 && height_percentile >= 10
-      { category: "8. Маловесный к сроку гестации", 
+      { category: "8. Низкое, маловесный к сроку гестации", 
         alert: "danger" }
     else
-      { category: "9. Малый к сроку гестации", 
+      { category: "9. Низкое, малый к сроку гестации", 
         alert: "danger" }
     end
   end
