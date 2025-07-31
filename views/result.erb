@@ -1,4 +1,5 @@
-<style>/* Кастомные стили оценки развития */
+<style>
+/* Кастомные стили оценки развития */
 .physical-dev-assessment {
   font-size: 1.0rem;
   padding: 1.5rem;
@@ -36,10 +37,12 @@
   font-size: 0.9rem;
   margin-top: 0.5rem;
 }
+
+/
 </style>
 
 <% @title = "Результаты оценки роста плода" %>
-
+<div class="no-print">
 <div class="row justify-content-center">
   <div class="col-lg-12">
     <div class="card shadow-sm mb-4 border-0">
@@ -99,11 +102,10 @@
                     <i class="bi bi-exclamation-triangle-fill"></i> <%= assessment[:message] %>
                   </div>
                 <% end %>
-
-
               </div>
             </div>
           </div>
+        </div> <!-- Закрываем пропущенный div -->
         
         <!-- Графики роста -->
         <div class="row">
@@ -186,15 +188,21 @@
                 </div>
               </div>
             </div>
+        </div> <!-- Закрываем row для графиков -->
         
         <div class="text-center mt-4">
+          <button onclick="window.printReport()" class="btn btn-main me-2">
+            <i class="bi bi-printer me-2"></i> Печать
+          </button>
           <a href="/" class="btn btn-main">
             <i class="bi bi-arrow-left-circle me-2"></i> Новый расчет
           </a>
         </div>
+
       </div>
     </div>
   </div>
+</div>
 </div>
 <script>
   // Функция для создания графика с учетом точного положения (недели + дни)
@@ -358,4 +366,175 @@
       'см'
     );
   });
+
+function printReport() {
+  // Создаем контейнер для печати
+  const printSection = document.createElement('div');
+  printSection.className = 'print-section';
+  
+  // Получаем данные из DOM
+  const gestationalAge = document.querySelector('.display-5').textContent.trim();
+  const gender = document.querySelector('.badge').textContent.trim();
+  const height = document.querySelector('.card-body .d-flex:nth-child(1) strong').textContent.trim();
+  const weight = document.querySelector('.card-body .d-flex:nth-child(2) strong').textContent.trim();
+  const headCircumference = document.querySelector('.card-body .d-flex:nth-child(3) strong').textContent.trim();
+  const assessment = document.querySelector('.physical-dev-assessment').textContent.trim();
+  
+  // Формируем компактный HTML для печати
+  printSection.innerHTML = `
+    <div class="print-header">
+      <h2>Результаты оценки роста плода</h2>
+      <div class="print-info-grid">
+        <div class="print-info-item">
+          <span class="print-info-label">Гестационный возраст:</span>
+          <span class="print-info-value">${gestationalAge}</span>
+        </div>
+        <div class="print-info-item">
+          <span class="print-info-label">Пол:</span>
+          <span class="print-info-value">${gender}</span>
+        </div>
+        <div class="print-info-item">
+          <span class="print-info-label">Рост:</span>
+          <span class="print-info-value">${height}</span>
+        </div>
+        <div class="print-info-item">
+          <span class="print-info-label">Вес:</span>
+          <span class="print-info-value">${weight}</span>
+        </div>
+        <div class="print-info-item">
+          <span class="print-info-label">Окружность головы:</span>
+          <span class="print-info-value">${headCircumference}</span>
+        </div>
+        <div class="print-info-item">
+          <span class="print-info-label">Оценка развития:</span>
+          <span class="print-info-value">${assessment}</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="print-charts">
+      <div class="print-chart-container">
+        <h4>Вес плода (кг)</h4>
+        <canvas id="printWeightChart" class="print-chart"></canvas>
+      </div>
+      
+      <div class="print-chart-container">
+        <h4>Рост плода (см)</h4>
+        <canvas id="printHeightChart" class="print-chart"></canvas>
+      </div>
+      
+      <div class="print-chart-container">
+        <h4>Окружность головы (см)</h4>
+        <canvas id="printHcChart" class="print-chart"></canvas>
+      </div>
+    </div>
+    
+    <div class="print-signature">
+      <div class="signature-line">Врач _____________ (подпись)</div>
+    </div>
+  `;
+  
+  // Добавляем стили для компактного отображения
+  const style = document.createElement('style');
+  style.textContent = `
+    @media print {
+      .print-info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+      .print-info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .print-info-label {
+        font-weight: bold;
+        margin-right: 0.5rem;
+      }
+      .print-info-value {
+        text-align: right;
+      }
+      .print-chart-container {
+        page-break-inside: avoid;
+        margin-bottom: 1rem;
+      }
+      .print-chart {
+        width: 100% !important;
+        height: 180px !important;
+      }
+    }
+  `;
+  printSection.appendChild(style);
+  
+  // Добавляем контейнер в документ
+  document.body.appendChild(printSection);
+  
+  // Копируем графики
+  setTimeout(() => {
+    const weightChart = Chart.getChart('weightChart');
+    const heightChart = Chart.getChart('heightChart');
+    const hcChart = Chart.getChart('hcChart');
+    
+    // Опции для печатных графиков
+    const printOptions = {
+      responsive: false,
+      maintainAspectRatio: false,
+      plugins: { 
+        legend: { display: false },
+        tooltip: { enabled: false }
+      },
+      scales: {
+        x: { 
+          ticks: { font: { size: 8 } },
+          title: { font: { size: 9 } }
+        },
+        y: { 
+          ticks: { font: { size: 8 } },
+          title: { font: { size: 9 } }
+        }
+      }
+    };
+    
+    // Создаем графики для печати
+    if (weightChart) {
+      new Chart(printSection.querySelector('#printWeightChart'), {
+        type: 'line',
+        data: JSON.parse(JSON.stringify(weightChart.data)),
+        options: printOptions
+      });
+    }
+    
+    if (heightChart) {
+      new Chart(printSection.querySelector('#printHeightChart'), {
+        type: 'line',
+        data: JSON.parse(JSON.stringify(heightChart.data)),
+        options: printOptions
+      });
+    }
+    
+    if (hcChart) {
+      new Chart(printSection.querySelector('#printHcChart'), {
+        type: 'line',
+        data: JSON.parse(JSON.stringify(hcChart.data)),
+        options: printOptions
+      });
+    }
+    
+    // Даем время на отрисовку графиков
+    setTimeout(() => {
+      window.print();
+      
+      // Удаляем временный контейнер после печати
+      setTimeout(() => {
+        if (printSection.parentNode) {
+          printSection.parentNode.removeChild(printSection);
+        }
+      }, 1000);
+    }, 1000);
+  }, 500);
+}
+
+window.printReport = printReport;
 </script>
