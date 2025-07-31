@@ -54,23 +54,35 @@ end
 def calculate_percentile(z_score)
   100 * (0.5 * (1 + Math.erf(z_score / Math.sqrt(2))))
 end
-
-# Получение медианных значений
-def get_median_values(gestational_week, measurement_type)
-  standards = BOYS_STANDARDS[measurement_type][gestational_week]
-  return nil unless standards
+# Получение медианных значений с учетом дней
+def get_median_values(gestational_week, gestational_day, measurement_type)
+  current_week_values = BOYS_STANDARDS[measurement_type][gestational_week]
+  next_week_values = BOYS_STANDARDS[measurement_type][gestational_week + 1] if gestational_week < 42
   
-  {
-    median: standards[3], # 50th percentile
-    variation: (standards[4] - standards[3]) / 1.28 # SD for 90th percentile (z=1.28)
-  }
+  return nil unless current_week_values
+  
+  if next_week_values && gestational_day > 0
+    # Интерполяция между неделями с учетом дней
+    day_fraction = gestational_day.to_f / 7.0
+    interpolated_values = current_week_values.each_with_index.map do |value, i|
+      value + (next_week_values[i] - value) * day_fraction
+    end
+    
+    {
+      median: interpolated_values[3], # 50th percentile
+      variation: (interpolated_values[4] - interpolated_values[3]) / 1.28
+    }
+  else
+    {
+      median: current_week_values[3], # 50th percentile
+      variation: (current_week_values[4] - current_week_values[3]) / 1.28
+    }
+  end
 end
 
-# Генерация данных для графиков
-def generate_growth_chart(measurement_type, user_value, gestational_week)
+def generate_growth_chart(measurement_type, user_value, gestational_week, gestational_day)
   standards = BOYS_STANDARDS[measurement_type]
   percentiles = [3, 10, 25, 50, 75, 90, 97]
-  z_scores = [-1.88, -1.28, -0.67, 0, 0.67, 1.28, 1.88]
   datasets = []
   
   # Генерация кривых процентилей
@@ -89,25 +101,28 @@ def generate_growth_chart(measurement_type, user_value, gestational_week)
     }
   end
 
-  # Добавление точки пользователя
+  # Добавление точки пользователя с учетом дней
   user_data = Array.new(10, nil) # 33-42 weeks = 10 points
   week_index = gestational_week - 33
-  user_data[week_index] = user_value if week_index.between?(0, 9)
+  exact_position = week_index + (gestational_day.to_f / 7.0) # Позиция с учетом дней
   
+  # Для отображения точки с учетом дней
   datasets << {
     label: "Ваш ребенок",
-    data: user_data,
+    data: (0..9).map { |i| i == week_index ? user_value : nil },
     pointBackgroundColor: '#ff0000',
     pointRadius: 8,
     pointHoverRadius: 12,
     pointBorderWidth: 2,
     pointBorderColor: '#ffffff',
-    showLine: false
+    showLine: false,
+    xValue: exact_position, # Добавляем точное значение позиции по X
   }
 
   {
     labels: (33..42).map { |w| "#{w} нед." },
-    datasets: datasets
+    datasets: datasets,
+    exact_position: exact_position # Передаем точную позицию для JS
   }
 end
 
@@ -130,16 +145,17 @@ post '/calculate' do
   gestational_week = params[:gestational_weeks].to_i
   gestational_day = params[:gestational_days].to_i
   
-  # Получаем медианные значения
-  weight_values = get_median_values(gestational_week, :weight)
-  height_values = get_median_values(gestational_week, :height)
-  hc_values = get_median_values(gestational_week, :hc)
-  
-  # Рассчитываем z-score и процентили
+  # Получаем параметры из формы
   height = params[:height].to_f
   weight = params[:weight].to_f
   hc = params[:head_circumference].to_f
+
+  # Получаем медианные значения с учетом дней
+  weight_values = get_median_values(gestational_week, gestational_day, :weight)
+  height_values = get_median_values(gestational_week, gestational_day, :height)
+  hc_values = get_median_values(gestational_week, gestational_day, :hc)
   
+  # Рассчитываем z-score и процентили
   height_z = calculate_z_score(height, height_values[:median], height_values[:variation])
   weight_z = calculate_z_score(weight, weight_values[:median], weight_values[:variation])
   hc_z = calculate_z_score(hc, hc_values[:median], hc_values[:variation])
@@ -152,7 +168,7 @@ post '/calculate' do
   @measurement = Measurement.new(
     gestational_weeks: gestational_week,
     gestational_days: gestational_day,
-    gender: 'M', # Только для мальчиков
+    gender: params[:gender] || 'M',
     height: height,
     weight: weight,
     head_circumference: hc,
@@ -164,10 +180,10 @@ post '/calculate' do
     hc_percentile: hc_percentile
   )
   
-  # Генерируем графики
-  @height_chart = generate_growth_chart(:height, height, gestational_week)
-  @weight_chart = generate_growth_chart(:weight, weight, gestational_week)
-  @hc_chart = generate_growth_chart(:hc, hc, gestational_week)
+  # Генерируем графики (теперь переменные height, weight, hc определены)
+  @height_chart = generate_growth_chart(:height, height, gestational_week, gestational_day)
+  @weight_chart = generate_growth_chart(:weight, weight, gestational_week, gestational_day)
+  @hc_chart = generate_growth_chart(:hc, hc, gestational_week, gestational_day)
   
   erb :result
 end

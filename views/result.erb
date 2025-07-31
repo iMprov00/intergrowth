@@ -99,10 +99,8 @@
                     <i class="bi bi-exclamation-triangle-fill"></i> <%= assessment[:message] %>
                   </div>
                 <% end %>
-                <div class="mt-3">
-  <p>Отладка: Вес <%= @measurement.weight %> кг (<%= @measurement.weight_percentile.round(1) %>%)</p>
-  <p>Рост <%= @measurement.height %> см (<%= @measurement.height_percentile.round(1) %>%)</p>
-</div>
+
+
               </div>
             </div>
           </div>
@@ -199,131 +197,165 @@
   </div>
 </div>
 <script>
+  // Функция для создания графика с учетом точного положения (недели + дни)
+  const createPrecisionChart = (canvasId, chartData, title, unit) => {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    
+    // Преобразуем данные для линейной шкалы
+    const transformedData = {
+      labels: chartData.labels,
+      datasets: chartData.datasets.map(dataset => {
+        if (dataset.label === "Ваш ребенок") {
+          // Для пользовательской точки создаем специальный dataset
+          return {
+            ...dataset,
+            data: [{ 
+              x: chartData.exact_position, 
+              y: dataset.data.find(v => v !== null) 
+            }],
+            pointRadius: 8,
+            pointHoverRadius: 12
+          };
+        } else {
+          // Для перцентильных кривых преобразуем данные
+          return {
+            ...dataset,
+            data: dataset.data.map((y, index) => ({
+              x: index,
+              y: y
+            }))
+          };
+        }
+      })
+    };
 
-  // Общие настройки для графиков
-  const chartOptions = (title, unit) => ({
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      datalabels: {
-        display: false
-      },
-      tooltip: {
-        callbacks: {
-          label: function(context) {
-            let label = context.dataset.label || '';
-            if (label) {
-              label += ': ';
+    // Специальные настройки для графика с учетом дней
+    const options = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              let label = context.dataset.label || '';
+              if (label) {
+                label += ': ';
+              }
+              if (context.parsed.y !== null) {
+                label += unit === 'кг' ? 
+                  context.parsed.y.toFixed(2) + ' кг' : 
+                  context.parsed.y.toFixed(1) + ' см';
+              }
+              return label;
+            },
+            title: function(context) {
+              // Показываем точный гестационный возраст в подсказке
+              const weeks = Math.floor(context[0].parsed.x);
+              const days = Math.round((context[0].parsed.x % 1) * 7);
+              return `${33 + weeks} нед. ${days} дн.`;
             }
-            if (context.parsed.y !== null) {
-              label += unit === 'кг' ? 
-                context.parsed.y.toFixed(2) + ' кг' : 
-                context.parsed.y.toFixed(1) + ' см';
+          }
+        },
+        legend: {
+          position: 'top',
+          labels: {
+            font: { size: 13 },
+            usePointStyle: true,
+            padding: 20,
+            filter: function(item) {
+              // Фильтруем дублирующиеся легенды
+              return !item.text.includes('Ваш ребенок') || 
+                     item.datasetIndex === chartData.datasets.length - 1;
             }
-            return label;
           }
         }
       },
-      legend: {
-        position: 'top',
-        labels: {
-          font: { size: 13 },
-          usePointStyle: true,
-          padding: 20,
-          generateLabels: function(chart) {
-            const datasets = chart.data.datasets;
-            return datasets.map(function(dataset, i) {
-              return {
-                text: dataset.label,
-                fillStyle: dataset.borderColor,
-                strokeStyle: dataset.borderColor,
-                lineWidth: dataset.borderWidth,
-                pointStyle: dataset.pointRadius > 0 ? 'circle' : 'line',
-                hidden: !chart.isDatasetVisible(i)
-              };
-            }).filter(function(label, i) {
-              return ;
-            });
+      scales: {
+        x: {
+          type: 'linear',
+          min: 0,
+          max: 9,
+          title: {
+            display: true,
+            text: 'Гестационный возраст (недели)',
+            font: { size: 14, weight: 'bold' }
+          },
+          ticks: {
+            stepSize: 1,
+            callback: function(value) {
+              return value % 1 === 0 ? (33 + value) + ' нед.' : '';
+            }
+          },
+          grid: { display: false }
+        },
+        y: {
+          title: {
+            display: true,
+            text: title + (unit ? ` (${unit})` : ''),
+            font: { size: 14, weight: 'bold' }
+          },
+          min: function(context) {
+            const min = Math.min(...context.chart.data.datasets
+              .flatMap(d => d.data.map(v => v.y).filter(v => v !== null)));
+            return unit === 'кг' ? Math.max(0, min * 0.9) : Math.max(30, min * 0.95);
+          },
+          max: function(context) {
+            const max = Math.max(...context.chart.data.datasets
+              .flatMap(d => d.data.map(v => v.y).filter(v => v !== null)));
+            return unit === 'кг' ? max * 1.1 : max * 1.05;
+          },
+          grid: { color: 'rgba(0,0,0,0.05)' }
+        }
+      },
+      elements: {
+        point: {
+          radius: function(context) {
+            return context.dataset.label === 'Ваш ребенок' ? 8 : 0;
+          },
+          hoverRadius: function(context) {
+            return context.dataset.label === 'Ваш ребенок' ? 12 : 6;
           }
+        },
+        line: {
+          borderWidth: function(context) {
+            return context.dataset.label === 'P50' ? 3 : 1;
+          },
+          tension: 0
         }
       }
-    },
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: 'Гестационный возраст (недели)',
-          font: { size: 14, weight: 'bold' }
-        },
-        grid: { display: false }
-      },
-      y: {
-        title: {
-          display: true,
-          text: title + (unit ? ` (${unit})` : ''),
-          font: { size: 14, weight: 'bold' }
-        },
-        min: function(context) {
-          const min = Math.min(...context.chart.data.datasets
-            .flatMap(d => d.data.filter(v => v !== null)));
-          return unit === 'кг' ? Math.max(0, min * 0.9) : Math.max(30, min * 0.95);
-        },
-        max: function(context) {
-          const max = Math.max(...context.chart.data.datasets
-            .flatMap(d => d.data.filter(v => v !== null)));
-          return unit === 'кг' ? max * 1.1 : max * 1.05;
-        },
-        grid: { color: 'rgba(0,0,0,0.05)' }
-      }
-    },
-    elements: {
-      point: {
-        radius: function(context) {
-          return context.dataset.label === 'Ваш ребенок' ? 8 : 0;
-        },
-        hoverRadius: function(context) {
-          return context.dataset.label === 'Ваш ребенок' ? 12 : 6;
-        }
-      },
-      line: {
-        borderWidth: function(context) {
-          return context.dataset.label === 'P50' ? 3 : 1;
-        },
-        tension: 0
-      }
-    }
-  });
+    };
 
-  // Инициализация графиков
+    return new Chart(ctx, {
+      type: 'line',
+      data: transformedData,
+      options: options
+    });
+  };
+
+  // Инициализация графиков с учетом дней
   document.addEventListener('DOMContentLoaded', function() {
     // График веса
-    new Chart(
-      document.getElementById('weightChart'),
-      {
-        type: 'line',
-        data: <%= @weight_chart.to_json %>,
-        options: chartOptions('Вес плода', 'кг')
-      }
+    createPrecisionChart(
+      'weightChart',
+      <%= @weight_chart.to_json %>,
+      'Вес плода', 
+      'кг'
     );
     
     // График роста
-    new Chart(
-      document.getElementById('heightChart'),
-      {
-        type: 'line',
-        data: <%= @height_chart.to_json %>,
-        options: chartOptions('Рост плода', 'см')
-      }
+    createPrecisionChart(
+      'heightChart',
+      <%= @height_chart.to_json %>,
+      'Рост плода', 
+      'см'
     );
     
     // График окружности головы
-    new Chart(
-      document.getElementById('hcChart'),
-      {
-        type: 'line',
-        data: <%= @hc_chart.to_json %>,
-        options: chartOptions('Окружность головы', 'см')
-      }
+    createPrecisionChart(
+      'hcChart',
+      <%= @hc_chart.to_json %>,
+      'Окружность головы', 
+      'см'
     );
   });
 </script>
