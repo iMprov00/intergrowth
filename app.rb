@@ -188,14 +188,14 @@ post '/calculate' do
   
   erb :result
 end
-
 helpers do
   def physical_development_assessment(weight, weight_percentile, height_percentile)
+    # Сначала проверяем условия по весу (приоритетные)
     if weight >= 5000
       { category: "5. Гигантский к сроку гестации", 
         alert: "danger" }
     elsif weight >= 4500
-      { category: "4. Черезмерно крупныц к сроку гестации", 
+      { category: "4. Чрезмерно крупный к сроку гестации", 
         alert: "danger" }
     elsif weight_percentile >= 97 && height_percentile >= 10
       { category: "3. Высокое, крупный к сроку гестации", 
@@ -203,21 +203,31 @@ helpers do
     elsif weight_percentile >= 90 && weight_percentile < 97 && height_percentile >= 10
       { category: "2. Выше среднего, крупный к сроку гестации", 
         alert: "warning" }
-    elsif weight_percentile >= 10 && weight_percentile < 90 && height_percentile >= 10
+    elsif weight_percentile >= 10 && weight_percentile < 90
       { category: "1. Среднее", 
         alert: "success" }
-    elsif weight_percentile >= 3 && weight_percentile < 10 && height_percentile >= 10
-      { category: "6. Ниже среднего, маловесный к сроку гестации", 
-        alert: "warning" }
-    elsif weight_percentile >= 3 && weight_percentile < 10 && height_percentile < 10
-      { category: "7. Ниже среднего, малый к сроку гестации", 
-        alert: "danger" }
-    elsif weight_percentile < 3 && height_percentile >= 10
-      { category: "8. Низкое, маловесный к сроку гестации", 
-        alert: "danger" }
+    elsif weight_percentile >= 3 && weight_percentile < 10
+      # Для пунктов 6 и 7 сначала проверяем вес
+      if height_percentile < 10
+        { category: "7. Ниже среднего, малый к сроку гестации", 
+          alert: "danger" }
+      else
+        { category: "6. Ниже среднего, маловесный к сроку гестации", 
+          alert: "warning" }
+      end
+    elsif weight_percentile < 3
+      # Для пунктов 8 и 9 сначала проверяем вес
+      if height_percentile < 10
+        { category: "9. Низкое, малый к сроку гестации", 
+          alert: "danger" }
+      else
+        { category: "8. Низкое, маловесный к сроку гестации", 
+          alert: "danger" }
+      end
     else
-      { category: "9. Низкое, малый к сроку гестации", 
-        alert: "danger" }
+      # Запасной вариант (не должен достигатьcя при правильных данных)
+      { category: "1. Среднее", 
+        alert: "success" }
     end
   end
 end
