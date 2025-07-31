@@ -20,6 +20,9 @@
   --gray-color: gray;
 }
 
+
+
+
 /* ====================== */
 /* Основные стили страницы */
 /* ====================== */
@@ -307,3 +310,75 @@ btn-group {
     padding: 1.25rem;
   }
 }
+
+/* Дополнительные цвета для бейджей */
+.bg-info {
+  background-color: #17a2b8 !important;
+}
+
+/* Стили для итоговой оценки */
+.display-6 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+
+.assessment-badge {
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  white-space: normal;
+  text-align: center;
+  display: inline-block;
+  max-width: 100%;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+/* Стили для блока оценки развития */
+.assessment-result {
+  margin: 1rem 0;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Убираем дублирование параметров */
+.small.text-muted {
+  display: none;
+}
+
+/* Увеличиваем минимальную высоту блока оценки */
+.assessment-value {
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.badge.bg-success {
+  background-color: #28a745 !important;
+}
+
+.badge.bg-warning {
+  background-color: #ffc107 !important;
+  color: #212529 !important;
+}
+
+.badge.bg-danger {
+  background-color: #dc3545 !important;
+}
+
+/* Уменьшаем отступы в карточке */
+.card-body.text-center {
+  padding: 1rem;
+}
+
+.assessment-value .badge {
+  font-size: 3.8rem !important;  /* Увеличено до ~29px */
+  padding: 1.2rem 2rem !important;
+  line-height: 1.5 !important;
+  min-width: 120% !important;
+}
+

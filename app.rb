@@ -171,3 +171,38 @@ post '/calculate' do
   
   erb :result
 end
+
+helpers do
+  def physical_development_assessment(weight, weight_percentile, height_percentile)
+    if weight >= 5000
+      { category: "5. Чрезмерно крупный к сроку гестации", 
+        message: "Вес выше 5000 кг!", 
+        alert: "danger" }
+    elsif weight >= 4500
+      { category: "4. Крупный к сроку гестации", 
+        message: "Вес выше 4500 кг!", 
+        alert: "danger" }
+    elsif weight_percentile >= 97 && height_percentile >= 10
+      { category: "3. Крупный к сроку гестации", 
+        alert: "danger" }
+    elsif weight_percentile >= 90 && weight_percentile < 97 && height_percentile >= 10
+      { category: "2. Выше среднего", 
+        alert: "warning" }
+    elsif weight_percentile >= 10 && weight_percentile < 90 && height_percentile >= 10
+      { category: "1. Среднее", 
+        alert: "success" }
+    elsif weight_percentile >= 3 && weight_percentile < 10 && height_percentile >= 10
+      { category: "6. Ниже среднего", 
+        alert: "warning" }
+    elsif weight_percentile >= 3 && weight_percentile < 10 && height_percentile < 10
+      { category: "7. Малый к сроку гестации", 
+        alert: "danger" }
+    elsif weight_percentile < 3 && height_percentile >= 10
+      { category: "8. Маловесный к сроку гестации", 
+        alert: "danger" }
+    else
+      { category: "9. Малый к сроку гестации", 
+        alert: "danger" }
+    end
+  end
+end
