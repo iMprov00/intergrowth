@@ -1,6 +1,7 @@
 require 'sinatra'
 require 'sinatra/activerecord'
 require './app/models/measurement'
+require './app/models/newborn'
 
 # Настройка БД
 set :database, { adapter: "sqlite3", database: "db/intergrowth.db" }
@@ -272,5 +273,80 @@ helpers do
       { category: "1. Среднее", 
         alert: "success" }
     end
+  end
+end
+
+
+
+# Маршруты для регистра
+get '/registry' do
+  @month = params[:month] ? Date.parse(params[:month]) : Date.today
+  @newborns = Newborn.where(birth_date: @month.beginning_of_month..@month.end_of_month)
+                     .order(birth_date: :desc)
+  erb :registry
+end
+
+get '/registry/new' do
+  @newborn = Newborn.new
+  erb :new_newborn
+end
+
+post '/registry' do
+  # Преобразуем параметры
+  newborn_params = params[:newborn]
+  
+  # Конвертируем вес и рост в числа
+  newborn_params[:birth_weight] = newborn_params[:birth_weight].to_f
+  newborn_params[:birth_height] = newborn_params[:birth_height].to_f
+  
+  # Создаем запись
+  @newborn = Newborn.new(newborn_params)
+  
+  if @newborn.save
+    # Логирование успешного сохранения
+    puts "Новая запись сохранена: #{@newborn.inspect}"
+    redirect '/registry'
+  else
+    # Логирование ошибок
+    puts "Ошибки при сохранении: #{@newborn.errors.full_messages}"
+    erb :new_newborn
+  end
+end
+
+
+delete '/registry/:id' do
+  Newborn.find(params[:id]).destroy
+  redirect '/registry'
+end
+
+
+# Показать модальное окно с данными
+get '/registry/:id/edit' do
+  @newborn = Newborn.find(params[:id])
+  erb :_edit_modal, layout: false
+end
+
+put '/registry/:id' do
+  content_type :json
+  
+  begin
+    # Получаем JSON данные из тела запроса
+    request.body.rewind
+    json_data = JSON.parse(request.body.read)
+    newborn_params = json_data['newborn'] || {}
+    
+    puts "Полученные параметры: #{newborn_params.inspect}"
+    
+    @newborn = Newborn.find(params[:id])
+    if @newborn.update(newborn_params)
+      { success: true }.to_json
+    else
+      status 422
+      { errors: @newborn.errors.full_messages }.to_json
+    end
+  rescue => e
+    puts "Ошибка: #{e.message}"
+    status 500
+    { error: e.message }.to_json
   end
 end

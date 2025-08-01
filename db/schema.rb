@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_16_070605) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_01_055215) do
   create_table "measurements", force: :cascade do |t|
     t.integer "gestational_weeks", null: false
     t.integer "gestational_days", null: false
@@ -24,6 +24,33 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_16_070605) do
     t.float "height_percentile"
     t.float "weight_percentile"
     t.float "hc_percentile"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "newborns", force: :cascade do |t|
+    t.string "last_name"
+    t.string "first_name"
+    t.string "patronymic"
+    t.string "gender", limit: 1
+    t.float "gestational_age"
+    t.string "delivery_method"
+    t.date "birth_date"
+    t.date "admission_date"
+    t.date "discharge_date"
+    t.string "outcome"
+    t.float "birth_weight"
+    t.float "discharge_weight"
+    t.float "birth_height"
+    t.integer "apgar_1"
+    t.integer "apgar_5"
+    t.string "hepatitis_b"
+    t.string "bcg"
+    t.string "icd_code"
+    t.string "hiv"
+    t.string "fetopathy"
+    t.string "feeding"
+    t.string "comorbidities"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

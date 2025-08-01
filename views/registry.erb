@@ -1,0 +1,265 @@
+<style> 
+  /* Стили для таблицы */
+  .clickable-row {
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .clickable-row:hover {
+    background-color: rgba(84, 198, 84, 0.1) !important;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+    position: relative; /* Удалите это если не поможет */
+  }
+
+  /* Уменьшаем отступы в ячейках */
+  .table td, .table th {
+    padding: 0.5rem;
+    vertical-align: middle;
+  }
+
+  /* Фиксируем ширину колонки с действиями */
+  .table th:last-child, .table td:last-child {
+    width: 100px;
+    text-align: center;
+  }
+
+  /* Кнопки действий */
+  .edit-btn, .delete-btn {
+    padding: 0.25rem 0.5rem;
+    margin: 0 2px;
+  }
+
+  /* Модальное окно */
+  #modalContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1050;
+    display: none;
+  }
+
+  #modalContainer.show {
+    display: block;
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1040;
+    width: 100vw;
+    height: 100vh;
+    background-color: #000;
+    opacity: 0.5;
+  }
+
+  .modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1050;
+    width: 80%;
+    max-width: 800px;
+  }
+
+  .modal-body .row {
+    margin-bottom: 1rem;
+  }
+
+  .modal-body label {
+    font-weight: 500;
+  }
+</style>
+
+<!-- Модальное окно будет вставлено сюда -->
+<div id="modalContainer"></div>
+  </div>
+</div>
+
+
+<div class="card mb-4">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">
+      <i class="bi bi-clipboard2-pulse me-2"></i>Регистр новорожденных
+    </h5>
+    <div>
+      <a href="/registry/new" class="btn btn-main">
+        <i class="bi bi-plus-circle"></i> Добавить
+      </a>
+    </div>
+  </div>
+  
+  <div class="card-body">
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <label for="month-select" class="form-label">Месяц:</label>
+        <input type="month" class="form-control" id="month-select" 
+               value="<%= @month.strftime('%Y-%m') %>"
+               onchange="window.location.href='/registry?month=' + this.value">
+      </div>
+    </div>
+    
+<div class="table-responsive">
+  <table class="table table-hover table-striped">
+    <thead>
+      <tr>
+        <th>№</th>
+        <th>ФИО</th>
+        <th>Пол</th>
+        <th>СГ</th>
+        <th>К/С</th>
+        <th>Дата рождения</th>
+        <th>Дата пост.</th>
+        <th>Дата вып.</th>
+        <th>Койко-дни</th>
+        <th>Масса (р/в)</th>
+        <th>Рост</th>
+        <th>Апгар</th>
+        <th>Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @newborns.each do |newborn| %>
+        <tr class="clickable-row" data-id="<%= newborn.id %>">
+          <td><%= newborn.id %></td>
+          <td><%= newborn.full_name %></td>
+          <td><%= newborn.gender == 'M' ? 'М' : 'Ж' %></td>
+          <td><%= "%.1f" % newborn.gestational_age if newborn.gestational_age %></td>
+          <td><%= newborn.delivery_method %></td>
+          <td><%= newborn.birth_date.strftime('%d.%m.%Y') %></td>
+          <td><%= newborn.admission_date&.strftime('%d.%m.%Y') %></td>
+          <td><%= newborn.discharge_date&.strftime('%d.%m.%Y') %></td>
+          <td><%= newborn.bed_days %></td>
+          <td>
+            <% if newborn.birth_weight && newborn.discharge_weight %>
+              <%= newborn.birth_weight %>/<%= newborn.discharge_weight %>
+            <% elsif newborn.birth_weight %>
+              <%= newborn.birth_weight %>
+            <% end %>
+          </td>
+          <td><%= newborn.birth_height %></td>
+          <td><%= newborn.apgar %></td>
+          <td>
+            <button class="btn btn-sm btn-outline-danger delete-btn" data-id="<%= newborn.id %>">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+</div>
+  
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Обработка удаления
+  document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const id = this.getAttribute('data-id');
+      if (confirm('Вы уверены, что хотите удалить эту запись?')) {
+        fetch(`/registry/${id}`, {
+          method: 'DELETE'
+        }).then(response => {
+          if (response.ok) {
+            window.location.reload();
+          }
+        });
+      }
+    });
+  });
+
+  // Открытие модального окна при клике на строку
+  document.querySelectorAll('.clickable-row').forEach(row => {
+    row.addEventListener('click', function(e) {
+      // Не открываем модальное окно если кликнули на кнопки действий
+      if (e.target.closest('.edit-btn, .delete-btn')) {
+        return;
+      }
+      
+      const id = this.getAttribute('data-id');
+      fetch(`/registry/${id}/edit`)
+        .then(response => response.text())
+        .then(html => {
+          const modalContainer = document.getElementById('modalContainer');
+          modalContainer.innerHTML = html;
+          modalContainer.classList.add('show');
+          
+          // Обработка закрытия модального окна
+          modalContainer.querySelector('.btn-close, .btn-secondary').addEventListener('click', () => {
+            modalContainer.classList.remove('show');
+            setTimeout(() => { modalContainer.innerHTML = ''; }, 300);
+          });
+          
+document.getElementById('editForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  console.log('Форма отправлена');
+  
+  // Собираем данные формы в правильном формате
+  const formData = new FormData(this);
+  const data = { newborn: {} }; // Главное изменение - создаем объект с ключом 'newborn'
+  
+  formData.forEach((value, key) => {
+    // Удаляем префикс 'newborn[' и суффикс ']' из имен полей
+    const cleanKey = key.replace(/^newborn\[(.*)\]$/, '$1');
+    console.log(`${key} -> ${cleanKey}: ${value}`);
+    
+    // Преобразуем пустые строки в null для числовых полей
+    if (['birth_weight', 'discharge_weight', 'birth_height', 'gestational_age', 'apgar_1', 'apgar_5'].includes(cleanKey)) {
+      data.newborn[cleanKey] = value === '' ? null : (isNaN(value) ? value : parseFloat(value));
+    } else {
+      data.newborn[cleanKey] = value === '' ? null : value;
+    }
+  });
+
+  console.log('Данные для отправки:', data);
+  
+  fetch(`/registry/${this.dataset.id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify(data)
+  })
+  .then(response => {
+    console.log('Статус ответа:', response.status);
+    if (!response.ok) {
+      return response.json().then(err => { throw err; });
+    }
+    return response.json();
+  })
+  .then(result => {
+    console.log('Результат:', result);
+    if (result.success) {
+      window.location.reload();
+    } else if (result.errors) {
+      alert('Ошибка: ' + result.errors.join(', '));
+    }
+  })
+  .catch(error => {
+    console.error('Ошибка при выполнении запроса:', error);
+    alert('Произошла ошибка при сохранении: ' + (error.message || JSON.stringify(error)));
+  });
+});
+        });
+    });
+  });
+});
+
+function closeModal() {
+  const modalContainer = document.getElementById('modalContainer');
+  modalContainer.classList.remove('show');
+  setTimeout(() => { modalContainer.innerHTML = ''; }, 300);
+}
+</script>
