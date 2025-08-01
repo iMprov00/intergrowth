@@ -360,3 +360,15 @@ put '/registry/:id' do
     { error: e.message }.to_json
   end
 end
+
+
+
+
+
+
+
+get '/reports' do  
+
+  erb :reports
+
+end

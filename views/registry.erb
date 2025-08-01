@@ -75,6 +75,83 @@
   .modal-body label {
     font-weight: 500;
   }
+
+
+  /* Уменьшение размера таблицы */
+.table-compact {
+  font-size: 0.75rem;
+}
+
+.table-compact thead th {
+  font-size: 0.8125rem;
+  padding: 0.3rem 0.5rem;
+}
+
+.table-compact tbody td {
+  padding: 0.3rem 0.5rem;
+}
+
+/* Для очень плотных таблиц */
+.table-extra-compact {
+  font-size: 0.8125rem;
+}
+
+.table-extra-compact thead th {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.3rem;
+}
+
+.table-extra-compact tbody td {
+  padding: 0.2rem 0.3rem;
+}
+</style>
+
+<style>
+  /* Компактное модальное окно */
+.compact-modal {
+  max-width: 700px; /* Уменьшаем максимальную ширину */
+}
+
+.compact-modal .modal-content {
+  font-size: 0.875rem; /* Уменьшаем базовый размер шрифта */
+}
+
+.compact-modal .modal-header,
+.compact-modal .modal-footer {
+  padding: 0.5rem 1rem; /* Уменьшаем отступы */
+}
+
+.compact-modal .modal-body {
+  padding: 0.8rem;
+}
+
+.compact-modal .form-label {
+  font-size: 0.8125rem; /* Уменьшаем размер меток */
+  margin-bottom: 0.2rem;
+}
+
+.compact-modal .form-control,
+.compact-modal .form-select {
+  font-size: 0.8125rem; /* Уменьшаем размер текста в полях */
+  padding: 0.3rem 0.6rem;
+  height: calc(1.5em + 0.6rem + 2px);
+}
+
+.compact-modal .btn {
+  font-size: 0.8125rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Уменьшаем отступы между строками */
+.compact-modal .row.g-3 {
+  --bs-gutter-y: 0.5rem;
+  --bs-gutter-x: 0.5rem;
+}
+
+/* Компактные заголовки */
+.compact-modal .modal-title {
+  font-size: 1rem;
+}
 </style>
 
 <!-- Модальное окно будет вставлено сюда -->
@@ -86,7 +163,7 @@
 <div class="card mb-4">
   <div class="card-header d-flex justify-content-between align-items-center">
     <h5 class="mb-0">
-      <i class="bi bi-clipboard2-pulse me-2"></i>Регистр новорожденных
+      <font color="white">Регистр новорожденных</font><i class="bi bi-clipboard2-pulse me-1"></i>
     </h5>
     <div>
       <a href="/registry/new" class="btn btn-main">
@@ -105,7 +182,7 @@
       </div>
     </div>
     
-<div class="table-responsive">
+<div class="table-compact">
   <table class="table table-hover table-striped">
     <thead>
       <tr>
@@ -113,15 +190,23 @@
         <th>ФИО</th>
         <th>Пол</th>
         <th>СГ</th>
-        <th>К/С</th>
+        <th>Роды</th>
         <th>Дата рождения</th>
         <th>Дата пост.</th>
         <th>Дата вып.</th>
         <th>Койко-дни</th>
         <th>Исход</th>
-        <th>Масса (р/в)</th>
-        <th>Рост</th>
+        <th>Масса (рожд.)</th>
+        <th>Масса (вып.)</th>
+        <th>Рост (рожд.)</th>
         <th>Апгар</th>
+        <th>Гепатит</th>
+        <th>БЦЖ</th>
+        <th>Код МКБ</th>
+        <th>ВИЧ</th>
+        <th>Фетопатия</th>
+        <th>Вскармливание</th>
+        <th>Сопутствующее</th>
         <th>Действия</th>
       </tr>
     </thead>
@@ -138,15 +223,17 @@
           <td><%= newborn.discharge_date&.strftime('%d.%m.%Y') %></td>
           <td><%= newborn.bed_days %></td>
           <td><%= newborn.outcome %></td>
-          <td>
-            <% if newborn.birth_weight && newborn.discharge_weight %>
-              <%= newborn.birth_weight %>/<%= newborn.discharge_weight %>
-            <% elsif newborn.birth_weight %>
-              <%= newborn.birth_weight %>
-            <% end %>
-          </td>
+          <td><%= newborn.birth_weight %></td>
+          <td><%= newborn.discharge_weight %></td>
           <td><%= newborn.birth_height %></td>
           <td><%= newborn.apgar %></td>
+          <td><%= newborn.hepatitis_b %></td>
+          <td><%= newborn.bcg %></td>
+          <td><%= newborn.icd_code %></td>
+          <td><%= newborn.hiv %></td>
+          <td><%= newborn.fetopathy %></td>
+          <td><%= newborn.feeding %></td>
+          <td><%= newborn.comorbidities %></td>
           <td>
             <button class="btn btn-sm btn-outline-danger delete-btn" data-id="<%= newborn.id %>">
               <i class="bi bi-trash"></i>
