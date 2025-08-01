@@ -46,6 +46,47 @@ BOYS_STANDARDS = {
   }
 }
 
+# Точные стандарты INTERGROWTH-21st для девочек
+GIRLS_STANDARDS = {
+  weight: {
+    # Неделя => [3rd, 5th, 10th, 50th, 90th, 95th, 97th]
+    33 => [1.20, 1.29, 1.41, 1.86, 2.35, 2.51, 2.61],
+    34 => [1.47, 1.55, 1.68, 2.13, 2.64, 2.79, 2.90],
+    35 => [1.71, 1.79, 1.92, 2.38, 2.89, 3.05, 3.16],
+    36 => [1.92, 2.01, 2.14, 2.60, 3.12, 3.28, 3.39],
+    37 => [2.11, 2.20, 2.33, 2.80, 3.32, 3.49, 3.60],
+    38 => [2.28, 2.37, 2.50, 2.97, 3.51, 3.67, 3.78],
+    39 => [2.42, 2.51, 2.65, 3.13, 3.66, 3.83, 3.94],
+    40 => [2.55, 2.64, 2.78, 3.26, 3.80, 3.97, 4.08],
+    41 => [2.65, 2.75, 2.89, 3.37, 3.92, 4.09, 4.20],
+    42 => [2.74, 2.84, 2.98, 3.46, 4.01, 4.19, 4.30]
+  },
+  hc: {
+    33 => [27.92, 28.26, 28.76, 30.46, 32.24, 32.78, 33.14],
+    34 => [28.64, 28.96, 29.44, 31.08, 32.78, 33.30, 33.65],
+    35 => [29.28, 29.59, 30.06, 31.64, 33.28, 33.78, 34.12],
+    36 => [29.87, 30.17, 30.62, 32.14, 33.74, 34.22, 34.55],
+    37 => [30.40, 30.69, 31.13, 32.61, 34.15, 34.62, 34.94],
+    38 => [30.88, 31.16, 31.59, 33.03, 34.53, 34.99, 35.30],
+    39 => [31.32, 31.59, 32.01, 33.41, 34.88, 35.32, 35.62],
+    40 => [31.72, 31.99, 32.39, 33.76, 35.19, 35.63, 35.92],
+    41 => [32.08, 32.34, 32.74, 34.08, 35.48, 35.91, 36.19],
+    42 => [32.41, 32.67, 33.06, 34.37, 35.74, 36.16, 36.44]
+  },
+  height: {
+    33 => [39.79, 40.28, 41.01, 43.39, 45.70, 46.39, 46.85],
+    34 => [41.04, 41.51, 42.22, 44.55, 46.79, 47.46, 47.92],
+    35 => [42.14, 42.61, 43.30, 45.57, 47.76, 48.42, 48.86],
+    36 => [43.13, 43.58, 44.26, 46.48, 48.62, 49.26, 49.69],
+    37 => [44.01, 44.45, 45.11, 47.29, 49.39, 50.02, 50.44],
+    38 => [44.79, 45.23, 45.88, 48.01, 50.07, 50.69, 51.10],
+    39 => [45.49, 45.92, 46.56, 48.65, 50.68, 51.29, 51.69],
+    40 => [46.12, 46.54, 47.17, 49.23, 51.23, 51.82, 52.22],
+    41 => [46.68, 47.10, 47.72, 49.75, 51.72, 52.30, 52.70],
+    42 => [47.19, 47.60, 48.21, 50.22, 52.15, 52.73, 53.12]
+  }
+}
+
 # Расчет z-score и процентиля
 def calculate_z_score(value, median, variation)
   (value - median) / variation
@@ -55,9 +96,10 @@ def calculate_percentile(z_score)
   100 * (0.5 * (1 + Math.erf(z_score / Math.sqrt(2))))
 end
 # Получение медианных значений с учетом дней
-def get_median_values(gestational_week, gestational_day, measurement_type)
-  current_week_values = BOYS_STANDARDS[measurement_type][gestational_week]
-  next_week_values = BOYS_STANDARDS[measurement_type][gestational_week + 1] if gestational_week < 42
+def get_median_values(gestational_week, gestational_day, measurement_type, gender)
+  standards = gender == 'M' ? BOYS_STANDARDS : GIRLS_STANDARDS
+  current_week_values = standards[measurement_type][gestational_week]
+  next_week_values = standards[measurement_type][gestational_week + 1] if gestational_week < 42
   
   return nil unless current_week_values
   
@@ -80,15 +122,15 @@ def get_median_values(gestational_week, gestational_day, measurement_type)
   end
 end
 
-def generate_growth_chart(measurement_type, user_value, gestational_week, gestational_day)
-  standards = BOYS_STANDARDS[measurement_type]
+def generate_growth_chart(measurement_type, user_value, gestational_week, gestational_day, gender)
+  standards = gender == 'M' ? BOYS_STANDARDS : GIRLS_STANDARDS
   percentiles = [3, 10, 25, 50, 75, 90, 97]
   datasets = []
   
   # Генерация кривых процентилей
   percentiles.each_with_index do |p, idx|
     data_points = (33..42).map do |week|
-      standards[week] ? standards[week][idx] : nil
+      standards[measurement_type][week] ? standards[measurement_type][week][idx] : nil
     end
     
     datasets << {
@@ -102,7 +144,6 @@ def generate_growth_chart(measurement_type, user_value, gestational_week, gestat
   end
 
   # Добавление точки пользователя с учетом дней
-  user_data = Array.new(10, nil) # 33-42 weeks = 10 points
   week_index = gestational_week - 33
   exact_position = week_index + (gestational_day.to_f / 7.0) # Позиция с учетом дней
   
@@ -144,6 +185,7 @@ end
 post '/calculate' do
   gestational_week = params[:gestational_weeks].to_i
   gestational_day = params[:gestational_days].to_i
+  gender = params[:gender] || 'M'
   
   # Получаем параметры из формы
   height = params[:height].to_f
@@ -152,9 +194,9 @@ post '/calculate' do
   hc = params[:head_circumference].to_f
 
   # Получаем медианные значения с учетом дней
-  weight_values = get_median_values(gestational_week, gestational_day, :weight)
-  height_values = get_median_values(gestational_week, gestational_day, :height)
-  hc_values = get_median_values(gestational_week, gestational_day, :hc)
+  weight_values = get_median_values(gestational_week, gestational_day, :weight, gender)
+  height_values = get_median_values(gestational_week, gestational_day, :height, gender)
+  hc_values = get_median_values(gestational_week, gestational_day, :hc, gender)
   
   # Рассчитываем z-score и процентили
   height_z = calculate_z_score(height, height_values[:median], height_values[:variation])
@@ -169,7 +211,7 @@ post '/calculate' do
   @measurement = Measurement.new(
     gestational_weeks: gestational_week,
     gestational_days: gestational_day,
-    gender: params[:gender] || 'M',
+    gender: gender,
     height: height,
     weight: weight,
     head_circumference: hc,
@@ -181,13 +223,14 @@ post '/calculate' do
     hc_percentile: hc_percentile
   )
   
-  # Генерируем графики (теперь переменные height, weight, hc определены)
-  @height_chart = generate_growth_chart(:height, height, gestational_week, gestational_day)
-  @weight_chart = generate_growth_chart(:weight, weight, gestational_week, gestational_day)
-  @hc_chart = generate_growth_chart(:hc, hc, gestational_week, gestational_day)
+  # Генерируем графики с учетом пола
+  @height_chart = generate_growth_chart(:height, height, gestational_week, gestational_day, gender)
+  @weight_chart = generate_growth_chart(:weight, weight, gestational_week, gestational_day, gender)
+  @hc_chart = generate_growth_chart(:hc, hc, gestational_week, gestational_day, gender)
   
   erb :result
 end
+
 helpers do
   def physical_development_assessment(weight, weight_percentile, height_percentile)
     # Сначала проверяем условия по весу (приоритетные)
