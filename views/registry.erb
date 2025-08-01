@@ -268,10 +268,40 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+
+function showNotification(message) {
+  // Создаем элемент уведомления
+  const notification = document.createElement('div');
+  notification.className = 'update-notification';
+  notification.innerHTML = `
+    <i class="bi bi-check-circle-fill"></i>
+    <span>${message}</span>
+  `;
+  
+  // Добавляем в контейнер
+  document.getElementById('notificationContainer').appendChild(notification);
+  
+  // Запускаем анимацию появления
+  setTimeout(() => {
+    notification.classList.add('show');
+  }, 50);
+  
+  // Автоматическое скрытие через 3 секунды
+  setTimeout(() => {
+    notification.classList.remove('show');
+    notification.classList.add('hide');
+    
+    // Удаляем элемент после завершения анимации
+    setTimeout(() => {
+      notification.remove();
+    }, 300);
+  }, 3000);
+}
   // Открытие модального окна при клике на строку
   document.querySelectorAll('.clickable-row').forEach(row => {
     row.addEventListener('click', function(e) {
       // Не открываем модальное окно если кликнули на кнопки действий
+            showNotification('Данные по ребёнку обновлены');
       if (e.target.closest('.edit-btn, .delete-btn')) {
         return;
       }

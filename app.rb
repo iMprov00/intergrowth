@@ -333,7 +333,14 @@ end
 # Показать модальное окно с данными
 get '/registry/:id/edit' do
   @newborn = Newborn.find(params[:id])
+  @original_data = @newborn.attributes
   erb :_edit_modal, layout: false
+end
+
+
+get '/registry/:id/current' do
+  content_type :json
+  Newborn.find(params[:id]).to_json
 end
 
 put '/registry/:id' do
