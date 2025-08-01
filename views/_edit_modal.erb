@@ -1,151 +1,184 @@
 <div class="modal-backdrop fade show"></div>
 <div class="modal fade show" id="editModal" tabindex="-1" aria-modal="true" role="dialog" style="display: block;">
-  <div class="modal-dialog compact-modal">
+  <div class="modal-dialog" style="max-width: 650px;">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Редактирование новорожденного</h5>
-        <button type="button" class="btn-close" onclick="closeModal()"></button>
+      <div class="modal-header bg-main text-white py-2">
+        <h6 class="modal-title mb-0"><i class="bi bi-pencil-square me-1"></i>Редактирование</h6>
+        <button type="button" class="btn-close btn-close-white" onclick="closeModal()"></button>
       </div>
       <form id="editForm" data-id="<%= @newborn.id %>">
-        <div class="modal-body">
-          <div class="row g-3">
-            <!-- Основные данные -->
-            <div class="col-md-4">
-              <label class="form-label">Фамилия*</label>
-              <input type="text" class="form-control" name="newborn[last_name]" value="<%= @newborn.last_name %>" required>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Имя*</label>
-              <input type="text" class="form-control" name="newborn[first_name]" value="<%= @newborn.first_name %>" required>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Отчество</label>
-              <input type="text" class="form-control" name="newborn[patronymic]" value="<%= @newborn.patronymic %>">
+        <div class="modal-body p-2">
+          
+          <!-- Компактная группировка полей -->
+          <div class="row g-1 mb-2">
+            <!-- ФИО -->
+            <div class="col-md-12 mb-1 p-1 border rounded">
+              <div class="row g-1">
+                <div class="col-md-4">
+                  <label class="form-label small text-muted mb-0">Фамилия*</label>
+                  <input type="text" class="form-control form-control-xs" name="newborn[last_name]" value="<%= @newborn.last_name %>" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label small text-muted mb-0">Имя*</label>
+                  <input type="text" class="form-control form-control-xs" name="newborn[first_name]" value="<%= @newborn.first_name %>" required>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label small text-muted mb-0">Отчество</label>
+                  <input type="text" class="form-control form-control-xs" name="newborn[patronymic]" value="<%= @newborn.patronymic %>">
+                </div>
+              </div>
             </div>
 
-            <!-- Даты -->
-            <div class="col-md-3">
-              <label class="form-label">Дата рождения*</label>
-              <input type="date" class="form-control" name="newborn[birth_date]" value="<%= @newborn.birth_date %>" required>
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Дата поступления</label>
-              <input type="date" class="form-control" name="newborn[admission_date]" value="<%= @newborn.admission_date %>">
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Дата выписки</label>
-              <input type="date" class="form-control" name="newborn[discharge_date]" value="<%= @newborn.discharge_date %>">
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Койко-дни</label>
-              <input type="text" class="form-control" value="<%= @newborn.bed_days %>" readonly>
+            <!-- Основные параметры -->
+            <div class="col-md-6 p-1">
+              <div class="border rounded p-1 h-100">
+                <div class="row g-1">
+                  <div class="col-md-6">
+                    <label class="form-label small text-muted mb-0">Дата рожд.*</label>
+                    <input type="date" class="form-control form-control-xs" name="newborn[birth_date]" value="<%= @newborn.birth_date %>" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small text-muted mb-0">Пол*</label>
+                    <select class="form-select form-select-xs" name="newborn[gender]" required>
+                      <option value="M" <%= 'selected' if @newborn.gender == 'M' %>>М</option>
+                      <option value="F" <%= 'selected' if @newborn.gender == 'F' %>>Ж</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small text-muted mb-0">СГ (нед.)*</label>
+                    <input type="number" step="0.1" class="form-control form-control-xs" name="newborn[gestational_age]" value="<%= @newborn.gestational_age %>" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small text-muted mb-0">Роды</label>
+                    <select class="form-select form-select-xs" name="newborn[delivery_method]">
+                      <option value="КС" <%= 'selected' if @newborn.delivery_method == 'КС' %>>КС</option>
+                      <option value="Сам." <%= 'selected' if @newborn.delivery_method == 'Сам.' %>>Сам.</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Физические параметры -->
-            <div class="col-md-3">
-              <label class="form-label">Масса при рождении (г)*</label>
-              <input type="number" step="10" class="form-control" name="newborn[birth_weight]" value="<%= @newborn.birth_weight %>" required>
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Масса при выписке (г)</label>
-              <input type="number" step="10" class="form-control" name="newborn[discharge_weight]" value="<%= @newborn.discharge_weight %>">
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Рост при рождении (см)*</label>
-              <input type="number" step="0.1" class="form-control" name="newborn[birth_height]" value="<%= @newborn.birth_height %>" required>
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">СГ (нед.)*</label>
-              <input type="number" step="0.1" class="form-control" name="newborn[gestational_age]" value="<%= @newborn.gestational_age %>" required>
-            </div>
-
-            <!-- Метод родоразрешения и пол -->
-            <div class="col-md-3">
-              <label class="form-label">Метод родоразрешения</label>
-              <select class="form-select" name="newborn[delivery_method]">
-                <option value="КС" <%= 'selected' if @newborn.delivery_method == 'КС' %>>Кесарево сечение</option>
-                <option value="Сам." <%= 'selected' if @newborn.delivery_method == 'Сам.' %>>Самостоятельные</option>
-              </select>
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Пол*</label>
-              <select class="form-select" name="newborn[gender]" required>
-                <option value="M" <%= 'selected' if @newborn.gender == 'M' %>>Мужской</option>
-                <option value="F" <%= 'selected' if @newborn.gender == 'F' %>>Женский</option>
-              </select>
-            </div>
-
-            <!-- Апгар -->
-            <div class="col-md-3">
-              <label class="form-label">Апгар (1 мин)</label>
-              <input type="number" min="0" max="10" class="form-control" name="newborn[apgar_1]" value="<%= @newborn.apgar_1 %>">
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Апгар (5 мин)</label>
-              <input type="number" min="0" max="10" class="form-control" name="newborn[apgar_5]" value="<%= @newborn.apgar_5 %>">
-            </div>
-
-            <div class="col-md-4">
-              <label class="form-label">Исход</label>
-              <input type="text" class="form-control" name="newborn[outcome]" 
-                     value="<%= @newborn.outcome %>">
-            </div>
-                        
-
-            <!-- Прививки -->
-            <div class="col-md-3">
-              <label class="form-label">Гепатит В</label>
-              <select class="form-select" name="newborn[hepatitis_b]">
-                <option value="Да" <%= 'selected' if @newborn.hepatitis_b == 'Да' %>>Да</option>
-                <option value="Нет" <%= 'selected' if @newborn.hepatitis_b == 'Нет' %>>Нет</option>
-                <option value="Нет" <%= 'selected' if @newborn.hepatitis_b == 'Нет' %>>Нет</option>
-              </select>
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">БЦЖ</label>
-              <select class="form-select" name="newborn[bcg]">
-                <option value="Да" <%= 'selected' if @newborn.bcg == 'Да' %>>Да</option>
-                <option value="Нет" <%= 'selected' if @newborn.bcg == 'Нет' %>>Нет</option>
-              </select>
-            </div>
-
-            <!-- Дополнительно -->
-            <div class="col-md-3">
-              <label class="form-label">Код МКБ</label>
-              <input type="text" class="form-control" name="newborn[icd_code]" value="<%= @newborn.icd_code %>">
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">ВИЧ</label>
-              <select class="form-select" name="newborn[hiv]">
-                <option value="Да" <%= 'selected' if @newborn.hiv == 'Да' %>>Да</option>
-                <option value="Нет" <%= 'selected' if @newborn.hiv == 'Нет' %>>Нет</option>
-              </select>
-            </div>
-
-            <!-- Вскармливание -->
-            <div class="col-md-4">
-              <label class="form-label">Вскармливание</label>
-              <select class="form-select" name="newborn[feeding]">
-                <option value="Грудное" <%= 'selected' if @newborn.feeding == 'Грудное' %>>Грудное молоко</option>
-                <option value="Смешанное" <%= 'selected' if @newborn.feeding == 'Смешанное' %>>Смешанное</option>
-                <option value="Искусственное" <%= 'selected' if @newborn.feeding == 'Искусственное' %>>Искусственное</option>
-              </select>
-            </div>
-
-            <!-- Текстовые поля -->
-            <div class="col-md-8">
-              <label class="form-label">Сопутствующее</label>
-              <input type="text" class="form-control" name="newborn[comorbidities]" value="<%= @newborn.comorbidities %>">
-            </div>
-            <div class="col-12">
-              <label class="form-label">Фетопатия</label>
-              <input type="text" class="form-control" name="newborn[fetopathy]" value="<%= @newborn.fetopathy %>">
+            <div class="col-md-6 p-1">
+              <div class="border rounded p-1 h-100">
+                <div class="row g-1">
+                  <div class="col-md-4">
+                    <label class="form-label small text-muted mb-0">Вес (рожд.)*</label>
+                    <input type="number" step="10" class="form-control form-control-xs" name="newborn[birth_weight]" value="<%= @newborn.birth_weight %>" required>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label small text-muted mb-0">Вес (вып.)</label>
+                    <input type="number" step="10" class="form-control form-control-xs" name="newborn[discharge_weight]" value="<%= @newborn.discharge_weight %>">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label small text-muted mb-0">Рост*</label>
+                    <input type="number" step="0.1" class="form-control form-control-xs" name="newborn[birth_height]" value="<%= @newborn.birth_height %>" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small text-muted mb-0">Апгар 1'</label>
+                    <input type="number" min="0" max="10" class="form-control form-control-xs" name="newborn[apgar_1]" value="<%= @newborn.apgar_1 %>">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small text-muted mb-0">Апгар 5'</label>
+                    <input type="number" min="0" max="10" class="form-control form-control-xs" name="newborn[apgar_5]" value="<%= @newborn.apgar_5 %>">
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+
+          <!-- Вторая строка -->
+          <div class="row g-1 mb-2">
+            <!-- Даты -->
+            <div class="col-md-4 p-1">
+              <div class="border rounded p-1 h-100">
+                <label class="form-label small text-muted mb-0">Дата пост.</label>
+                <input type="date" class="form-control form-control-xs mb-1" name="newborn[admission_date]" value="<%= @newborn.admission_date %>">
+                
+                <label class="form-label small text-muted mb-0">Дата вып.</label>
+                <input type="date" class="form-control form-control-xs mb-1" name="newborn[discharge_date]" value="<%= @newborn.discharge_date %>">
+                
+                <label class="form-label small text-muted mb-0">Койко-дни</label>
+                <input type="text" class="form-control form-control-xs" value="<%= @newborn.bed_days %>" readonly>
+              </div>
+            </div>
+
+            <!-- Мед. данные -->
+            <div class="col-md-4 p-1">
+              <div class="border rounded p-1 h-100">
+                <label class="form-label small text-muted mb-0">Исход</label>
+                <select class="form-select form-select-xs mb-1" name="newborn[outcome]">
+                  <option value="">-</option>
+                  <option value="Дом" <%= 'selected' if @newborn.outcome == 'Дом' %>>Дом</option>
+                  <option value="ОПНиНД" <%= 'selected' if @newborn.outcome == 'ОПНиНД' %>>ОПНиНД</option>
+                  <option value="ОРиИТн" <%= 'selected' if @newborn.outcome == 'ОРиИТн' %>>ОРиИТн</option>
+                  <option value="Отказ" <%= 'selected' if @newborn.outcome == 'Отказ' %>>Отказ</option>
+                  <option value="Самоуход" <%= 'selected' if @newborn.outcome == 'Самоуход' %>>Самоуход</option>
+                </select>
+                
+                <label class="form-label small text-muted mb-0">Вскармливание</label>
+                <select class="form-select form-select-xs mb-1" name="newborn[feeding]">
+                  <option value="Грудное" <%= 'selected' if @newborn.feeding == 'Грудное' %>>Грудное</option>
+                  <option value="Смешанное" <%= 'selected' if @newborn.feeding == 'Смешанное' %>>Смешанное</option>
+                  <option value="Искусственное" <%= 'selected' if @newborn.feeding == 'Искусственное' %>>Искусственное</option>
+                </select>
+                
+                <label class="form-label small text-muted mb-0">Код МКБ</label>
+                <input type="text" class="form-control form-control-xs" name="newborn[icd_code]" value="<%= @newborn.icd_code %>">
+              </div>
+            </div>
+
+            <!-- Прививки -->
+            <div class="col-md-4 p-1">
+              <div class="border rounded p-1 h-100">
+                <label class="form-label small text-muted mb-0">Гепатит В</label>
+                <select class="form-select form-select-xs mb-1" name="newborn[hepatitis_b]">
+                  <option value="-" <%= 'selected' if @newborn.hepatitis_b == '-' %>>-</option>
+                  <option value="Да" <%= 'selected' if @newborn.hepatitis_b == 'Да' %>>Да</option>
+                  <option value="Отказ" <%= 'selected' if @newborn.hepatitis_b == 'Отказ' %>>Отказ</option>
+                  <option value="Медотвод" <%= 'selected' if @newborn.hepatitis_b == 'Медотвод' %>>Медотвод</option>
+                </select>
+                
+                <label class="form-label small text-muted mb-0">БЦЖ</label>
+                <select class="form-select form-select-xs mb-1" name="newborn[bcg]">
+                  <option value="-" <%= 'selected' if @newborn.bcg == '-' %>>-</option>
+                  <option value="Да" <%= 'selected' if @newborn.bcg == 'Да' %>>Да</option>
+                  <option value="Отказ" <%= 'selected' if @newborn.bcg == 'Отказ' %>>Отказ</option>
+                  <option value="Медотвод" <%= 'selected' if @newborn.bcg == 'Медотвод' %>>Медотвод</option>
+                </select>
+                
+                <label class="form-label small text-muted mb-0">ВИЧ</label>
+                <select class="form-select form-select-xs" name="newborn[hiv]">
+                  <option value="-" <%= 'selected' if @newborn.hiv == '-' %>>-</option>
+                  <option value="Да" <%= 'selected' if @newborn.hiv == 'Да' %>>Да</option>
+                  <option value="Отказ" <%= 'selected' if @newborn.hiv == 'Отказ' %>>Отказ</option>
+                  <option value="Медотвод" <%= 'selected' if @newborn.hiv == 'Медотвод' %>>Медотвод</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Текстовые поля -->
+          <div class="row g-1">
+            <div class="col-md-6 p-1">
+              <label class="form-label small text-muted mb-0">Фетопатия</label>
+              <input type="text" class="form-control form-control-xs" name="newborn[fetopathy]" value="<%= @newborn.fetopathy %>">
+            </div>
+            <div class="col-md-6 p-1">
+              <label class="form-label small text-muted mb-0">Сопутствующее</label>
+              <input type="text" class="form-control form-control-xs" name="newborn[comorbidities]" value="<%= @newborn.comorbidities %>">
+            </div>
+          </div>
+          
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeModal()">Закрыть</button>
-          <button type="submit" class="btn btn-main">Сохранить</button>
+        <div class="modal-footer py-1 px-2 bg-light">
+          <button type="button" class="btn btn-outline-secondary btn-xs" onclick="closeModal()">
+            <i class="bi bi-x me-1"></i>Закрыть
+          </button>
+          <button type="submit" class="btn btn-main btn-xs">
+            <i class="bi bi-check me-1"></i>Сохранить
+          </button>
         </div>
       </form>
     </div>
