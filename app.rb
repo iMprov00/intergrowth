@@ -280,7 +280,17 @@ end
 
 # Маршруты для регистра
 get '/registry' do
-  @month = params[:month] ? Date.parse(params[:month]) : Date.today
+  begin
+  @month = if params[:month]
+    # Добавляем "-01" чтобы получить полную дату (первое число месяца)
+    Date.strptime(params[:month], "%Y-%m")
+  else
+    Date.today
+  end
+rescue ArgumentError => e
+  puts "Ошибка парсинга даты: #{e.message}"
+  @month = Date.today
+end
   @newborns = Newborn.where(birth_date: @month.beginning_of_month..@month.end_of_month)
                      .order(birth_date: :desc)
   erb :registry

@@ -118,6 +118,7 @@
         <th>Дата пост.</th>
         <th>Дата вып.</th>
         <th>Койко-дни</th>
+        <th>Исход</th>
         <th>Масса (р/в)</th>
         <th>Рост</th>
         <th>Апгар</th>
@@ -136,6 +137,7 @@
           <td><%= newborn.admission_date&.strftime('%d.%m.%Y') %></td>
           <td><%= newborn.discharge_date&.strftime('%d.%m.%Y') %></td>
           <td><%= newborn.bed_days %></td>
+          <td><%= newborn.outcome %></td>
           <td>
             <% if newborn.birth_weight && newborn.discharge_weight %>
               <%= newborn.birth_weight %>/<%= newborn.discharge_weight %>

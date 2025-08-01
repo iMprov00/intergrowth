@@ -85,11 +85,19 @@
               <input type="number" min="0" max="10" class="form-control" name="newborn[apgar_5]" value="<%= @newborn.apgar_5 %>">
             </div>
 
+            <div class="col-md-4">
+              <label class="form-label">Исход</label>
+              <input type="text" class="form-control" name="newborn[outcome]" 
+                     value="<%= @newborn.outcome %>">
+            </div>
+                        
+
             <!-- Прививки -->
             <div class="col-md-3">
               <label class="form-label">Гепатит В</label>
               <select class="form-select" name="newborn[hepatitis_b]">
                 <option value="Да" <%= 'selected' if @newborn.hepatitis_b == 'Да' %>>Да</option>
+                <option value="Нет" <%= 'selected' if @newborn.hepatitis_b == 'Нет' %>>Нет</option>
                 <option value="Нет" <%= 'selected' if @newborn.hepatitis_b == 'Нет' %>>Нет</option>
               </select>
             </div>
