@@ -41,6 +41,78 @@
 /
 </style>
 
+<style>
+/* Стили для печати */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-section, .print-section *,
+  #printWeightChart, #printHeightChart, #printHcChart {
+    visibility: visible;
+  }
+  #weightChart, #heightChart, #hcChart {
+    visibility: hidden !important;
+    display: none !important;
+  }
+  .print-section {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 20px;
+  }
+
+  .print-info {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  .print-card {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #f9f9f9;
+  }
+  .print-charts {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-top: 20px;
+  }
+  .print-chart-container {
+    page-break-inside: avoid;
+    margin-bottom: 20px;
+  }
+  .print-chart-title {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  .print-assessment {
+    font-size: 1.1rem;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+  }
+  .print-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.8rem;
+    color: #666;
+  }
+  canvas {
+    max-width: 100% !important;
+    height: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
+</style>
+
 <% @title = "Результаты оценки роста плода" %>
 <div class="no-print">
 <div class="row justify-content-center">
@@ -201,6 +273,82 @@
 
       </div>
     </div>
+
+
+
+<!-- Секция для печати -->
+<div class="print-section" style="display: none;">
+  <div class="print-header">
+    <h2>Результаты оценки роста плода</h2>
+    <p>Дата: <%= Date.today.strftime("%d.%m.%Y") %></p>
+  </div>
+  
+  <div class="print-info">
+    <div class="print-card">
+      <h5>Гестационный возраст</h5>
+      <div class="display-5 fw-bold">
+        <%= @measurement.gestational_weeks %>+<%= @measurement.gestational_days %> нед.
+      </div>
+      <div class="mt-2">
+        <span class="badge" style="background-color: <%= @measurement.gender == 'M' ? '#0d6efd' : '#ff66b3' %>">
+          <%= @measurement.gender == 'M' ? 'Мужской' : 'Женский' %>
+        </span>
+      </div>
+    </div>
+    
+    <div class="print-card">
+      <h5>Параметры</h5>
+      <div class="d-flex justify-content-between mb-2">
+        <span>Рост:</span>
+        <strong><%= @measurement.height %> см (<%= @measurement.height_percentile.round(1) %> перц.)</strong>
+      </div>
+      <div class="d-flex justify-content-between mb-2">
+        <span>Вес:</span>
+        <strong><%= @measurement.weight %> кг (<%= @measurement.weight_percentile.round(1) %> перц.)</strong>
+      </div>
+      <div class="d-flex justify-content-between">
+        <span>Окружность головы:</span>
+        <strong><%= @measurement.head_circumference %> см (<%= @measurement.hc_percentile.round(1) %> перц.)</strong>
+      </div>
+    </div>
+    
+    <div class="print-card">
+      <h5>Физическое развитие</h5>
+      <% assessment = physical_development_assessment(@measurement.weight, @measurement.weight_percentile, @measurement.height_percentile) %>
+      <div class="print-assessment" style="background-color: <%= assessment[:alert] == 'success' ? '#28a745' : assessment[:alert] == 'warning' ? '#ffc107' : '#dc3545' %>; color: <%= assessment[:alert] == 'warning' ? '#212529' : 'white' %>">
+        <%= assessment[:category].sub(/^\d+\.\s/, '') %>
+      </div>
+      <% if assessment[:message] %>
+        <div style="background-color: #f8d7da; color: #721c24; padding: 0.5rem; border-radius: 4px; font-size: 0.9rem;">
+          <i class="bi bi-exclamation-triangle-fill"></i> <%= assessment[:message] %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  
+  <div class="print-charts">
+    <div class="print-chart-container">
+      <div class="print-chart-title">График веса плода (кг)</div>
+      <canvas id="printWeightChart"></canvas>
+    </div>
+    
+    <div class="print-chart-container">
+      <div class="print-chart-title">График роста плода (см)</div>
+      <canvas id="printHeightChart"></canvas>
+    </div>
+    
+    <div class="print-chart-container">
+      <div class="print-chart-title">График окружности головы (см)</div>
+      <canvas id="printHcChart"></canvas>
+    </div>
+  </div>
+  
+  <div class="print-footer">
+    Врач _________________________ (подпись)
+  </div>
+</div>
+
+
   </div>
 </div>
 </div>
@@ -367,174 +515,57 @@
     );
   });
 
-function printReport() {
-  // Создаем контейнер для печати
-  const printSection = document.createElement('div');
-  printSection.className = 'print-section';
-  
-  // Получаем данные из DOM
-  const gestationalAge = document.querySelector('.display-5').textContent.trim();
-  const gender = document.querySelector('.badge').textContent.trim();
-  const height = document.querySelector('.card-body .d-flex:nth-child(1) strong').textContent.trim();
-  const weight = document.querySelector('.card-body .d-flex:nth-child(2) strong').textContent.trim();
-  const headCircumference = document.querySelector('.card-body .d-flex:nth-child(3) strong').textContent.trim();
-  const assessment = document.querySelector('.physical-dev-assessment').textContent.trim();
-  
-  // Формируем компактный HTML для печати
-  printSection.innerHTML = `
-    <div class="print-header">
-      <h2>Результаты оценки роста плода</h2>
-      <div class="print-info-grid">
-        <div class="print-info-item">
-          <span class="print-info-label">Гестационный возраст:</span>
-          <span class="print-info-value">${gestationalAge}</span>
-        </div>
-        <div class="print-info-item">
-          <span class="print-info-label">Пол:</span>
-          <span class="print-info-value">${gender}</span>
-        </div>
-        <div class="print-info-item">
-          <span class="print-info-label">Рост:</span>
-          <span class="print-info-value">${height}</span>
-        </div>
-        <div class="print-info-item">
-          <span class="print-info-label">Вес:</span>
-          <span class="print-info-value">${weight}</span>
-        </div>
-        <div class="print-info-item">
-          <span class="print-info-label">Окружность головы:</span>
-          <span class="print-info-value">${headCircumference}</span>
-        </div>
-        <div class="print-info-item">
-          <span class="print-info-label">Оценка развития:</span>
-          <span class="print-info-value">${assessment}</span>
-        </div>
-      </div>
-    </div>
-    
-    <div class="print-charts">
-      <div class="print-chart-container">
-        <h4>Вес плода (кг)</h4>
-        <canvas id="printWeightChart" class="print-chart"></canvas>
-      </div>
-      
-      <div class="print-chart-container">
-        <h4>Рост плода (см)</h4>
-        <canvas id="printHeightChart" class="print-chart"></canvas>
-      </div>
-      
-      <div class="print-chart-container">
-        <h4>Окружность головы (см)</h4>
-        <canvas id="printHcChart" class="print-chart"></canvas>
-      </div>
-    </div>
-    
-    <div class="print-signature">
-      <div class="signature-line">Врач _____________ (подпись)</div>
-    </div>
-  `;
-  
-  // Добавляем стили для компактного отображения
-  const style = document.createElement('style');
-  style.textContent = `
-    @media print {
-      .print-info-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-      }
-      .print-info-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      .print-info-label {
-        font-weight: bold;
-        margin-right: 0.5rem;
-      }
-      .print-info-value {
-        text-align: right;
-      }
-      .print-chart-container {
-        page-break-inside: avoid;
-        margin-bottom: 1rem;
-      }
-      .print-chart {
-        width: 100% !important;
-        height: 180px !important;
-      }
+// Функция для проверки готовности графиков
+function checkChartsReady(charts, callback) {
+  const checkInterval = setInterval(() => {
+    const allReady = charts.every(chart => !chart.ctx.canvas.classList.contains('chartjs-render-monitor'));
+    if (allReady) {
+      clearInterval(checkInterval);
+      callback();
     }
-  `;
-  printSection.appendChild(style);
-  
-  // Добавляем контейнер в документ
-  document.body.appendChild(printSection);
-  
-  // Копируем графики
-  setTimeout(() => {
-    const weightChart = Chart.getChart('weightChart');
-    const heightChart = Chart.getChart('heightChart');
-    const hcChart = Chart.getChart('hcChart');
-    
-    // Опции для печатных графиков
-    const printOptions = {
-      responsive: false,
-      maintainAspectRatio: false,
-      plugins: { 
-        legend: { display: false },
-        tooltip: { enabled: false }
-      },
-      scales: {
-        x: { 
-          ticks: { font: { size: 8 } },
-          title: { font: { size: 9 } }
-        },
-        y: { 
-          ticks: { font: { size: 8 } },
-          title: { font: { size: 9 } }
-        }
-      }
-    };
-    
-    // Создаем графики для печати
-    if (weightChart) {
-      new Chart(printSection.querySelector('#printWeightChart'), {
-        type: 'line',
-        data: JSON.parse(JSON.stringify(weightChart.data)),
-        options: printOptions
-      });
-    }
-    
-    if (heightChart) {
-      new Chart(printSection.querySelector('#printHeightChart'), {
-        type: 'line',
-        data: JSON.parse(JSON.stringify(heightChart.data)),
-        options: printOptions
-      });
-    }
-    
-    if (hcChart) {
-      new Chart(printSection.querySelector('#printHcChart'), {
-        type: 'line',
-        data: JSON.parse(JSON.stringify(hcChart.data)),
-        options: printOptions
-      });
-    }
-    
-    // Даем время на отрисовку графиков
-    setTimeout(() => {
-      window.print();
-      
-      // Удаляем временный контейнер после печати
-      setTimeout(() => {
-        if (printSection.parentNode) {
-          printSection.parentNode.removeChild(printSection);
-        }
-      }, 1000);
-    }, 1000);
-  }, 500);
+  }, 50);
 }
 
-window.printReport = printReport;
+// Функция для печати
+window.printReport = function() {
+  // Показываем секцию для печати
+  document.querySelector('.print-section').style.display = 'block';
+  
+  // Создаем копии графиков для печати
+  const weightChart = createPrecisionChart(
+    'printWeightChart',
+    <%= @weight_chart.to_json %>,
+    'Вес плода', 
+    'кг'
+  );
+  
+  const heightChart = createPrecisionChart(
+    'printHeightChart',
+    <%= @height_chart.to_json %>,
+    'Рост плода', 
+    'см'
+  );
+  
+  const hcChart = createPrecisionChart(
+    'printHcChart',
+    <%= @hc_chart.to_json %>,
+    'Окружность головы', 
+    'см'
+  );
+  
+  // Добавляем небольшую задержку, чтобы графики успели отрендериться
+  setTimeout(() => {
+    // Запускаем печать
+    window.print();
+    
+    // После печати скрываем секцию и уничтожаем графики
+    setTimeout(() => {
+      document.querySelector('.print-section').style.display = 'none';
+      weightChart.destroy();
+      heightChart.destroy();
+      hcChart.destroy();
+    }, 100);
+  }, 300);
+};
+
 </script>
