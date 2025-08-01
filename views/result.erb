@@ -44,6 +44,19 @@
 <style>
 /* Стили для печати */
 @media print {
+
+
+  /* Делаем заголовки и текст черными при печати */
+  .print-card h5,
+  .print-card .display-5,
+  .print-card .badge,
+  .print-card strong,
+  .print-card span {
+    color: #000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
   body * {
     visibility: hidden;
   }
@@ -69,12 +82,20 @@
     gap: 15px;
     margin-bottom: 20px;
   }
-  .print-card {
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 10px;
-    background-color: #f9f9f9;
+ 
+  /* Особенно для бейджа с полом */
+  .print-card .badge {
+    background-color: <%= @measurement.gender == 'M' ? '#0d6efd' : '#ff66b3' %> !important;
+    color: white !important;
+    border: 1px solid #000;
   }
+
+  /* Для заголовка "Физическое развитие" */
+  .print-card:nth-child(3) h5 {
+    color: #000 !important;
+    font-weight: bold !important;
+  }
+
   .print-charts {
     display: grid;
     grid-template-columns: 1fr;
@@ -82,13 +103,14 @@
     margin-top: 20px;
   }
   .print-chart-container {
+    margin-bottom: 30px;
     page-break-inside: avoid;
-    margin-bottom: 20px;
   }
   .print-chart-title {
     text-align: center;
     font-weight: bold;
-    margin-bottom: 10px;
+    font-size: 18px;
+    margin-bottom: 15px;
   }
   .print-assessment {
     font-size: 1.1rem;
@@ -97,6 +119,7 @@
     border-radius: 5px;
     text-align: center;
     font-weight: bold;
+    color: #000 !important;
   }
   .print-footer {
     text-align: center;
