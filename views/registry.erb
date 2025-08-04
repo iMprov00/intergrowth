@@ -166,11 +166,17 @@
       <font color="white">Регистр новорожденных</font><i class="bi bi-clipboard2-pulse me-1"></i>
     </h5>
     <div>
-      <a href="/registry/new" class="btn btn-main">
+    <div class="d-flex align-items-center">
+      <div class="input-group input-group-sm ms-3" style="width: 250px;">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input type="text" id="searchInput" class="form-control" placeholder="Поиск...">
+      </div>
+      <a href="/registry/new" class="btn btn-main ms-2">
         <i class="bi bi-plus-circle"></i> Добавить
       </a>
     </div>
   </div>
+</div>
   
   <div class="card-body">
     <div class="row mb-3">
@@ -381,4 +387,20 @@ function closeModal() {
   modalContainer.classList.remove('show');
   setTimeout(() => { modalContainer.innerHTML = ''; }, 300);
 }
+
+
+// Поиск по таблице
+document.getElementById('searchInput').addEventListener('input', function() {
+  const searchTerm = this.value.toLowerCase();
+  const rows = document.querySelectorAll('.clickable-row');
+  
+  rows.forEach(row => {
+    const rowText = row.textContent.toLowerCase();
+    row.style.display = rowText.includes(searchTerm) ? '' : 'none';
+  });
+  
+  // Показываем уведомление о количестве найденных записей
+  const visibleCount = document.querySelectorAll('.clickable-row[style=""]').length;
+  showNotification(`Найдено записей: ${visibleCount}`, 'info');
+});
 </script>
