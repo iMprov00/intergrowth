@@ -425,3 +425,9 @@ helpers do
     end
   end
 end
+
+get '/help' do 
+
+  erb :help
+
+end

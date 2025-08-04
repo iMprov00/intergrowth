@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отделение новорожденных - Руководство разработчика</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+        }
+        h1, h2, h3, h4 {
+            color: #2c3e50;
+            margin-top: 1.5rem;
+        }
+        h1 {
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5rem;
+        }
+        h2 {
+            border-left: 4px solid #3498db;
+            padding-left: 1rem;
+        }
+        code {
+            background-color: #f8f9fa;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .file-structure {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .icon {
+            font-size: 1.2rem;
+            margin-right: 0.5rem;
+        }
+        .problem {
+            background-color: #fff8e1;
+            padding: 1rem;
+            border-left: 4px solid #ffc107;
+            margin-bottom: 1rem;
+        }
+        .solution {
+            background-color: #e8f5e9;
+            padding: 1rem;
+            border-left: 4px solid #4caf50;
+            margin-bottom: 1rem;
+        }
+        .note {
+            background-color: #e3f2fd;
+            padding: 1rem;
+            border-left: 4px solid #2196f3;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <h1 class="mb-4"><i class="bi bi-book icon"></i>Отделение новорожденных - Руководство разработчика</h1>
+
+        <section class="mb-5">
+            <h2 class="mb-3"><i class="bi bi-info-circle icon"></i>Общее описание проекта</h2>
+            <p>Веб-приложение для оценки роста плода по стандартам INTERGROWTH-21st и ведения регистра новорожденных.</p>
+            <h4 class="mt-4">Особенности:</h4>
+            <ul>
+                <li>Расчет перцентилей плода по антропометрическим данным</li>
+                <li>Визуализация данных на графиках Chart.js</li>
+                <li>Ведение базы данных новорожденных</li>
+                <li>Все CSS/JS встроены непосредственно в шаблоны ERB</li>
+            </ul>
+        </section>
+
+        <section class="mb-5">
+            <h2 class="mb-3"><i class="bi bi-folder icon"></i>Структура проекта</h2>
+            <div class="file-structure mb-4">
+                intergrowth/<br>
+                ├── app/                   # Модели данных<br>
+                │   ├── models/<br>
+                │   │   ├── measurement.rb # Модель для расчетов роста плода<br>
+                │   │   └── newborn.rb     # Модель для регистра новорожденных<br>
+                │<br>
+                ├── db/                    # База данных<br>
+                │   ├── migrate/<br>
+                │   │   └── schema.rb      # Схема БД<br>
+                │   └── intergrowth.db     # SQLite база данных<br>
+                │<br>
+                ├── public/                # Статические файлы<br>
+                │   └── images/            # Изображения<br>
+                │       ├── favicon.png<br>
+                │       ├── logo.png<br>
+                │       └── valakas.png<br>
+                │<br>
+                ├── views/                 # Шаблоны со встроенными CSS/JS<br>
+                │   ├── layout.erb         # Основной каркас приложения<br>
+                │   ├── index.erb          # Главная страница (калькулятор)<br>
+                │   ├── result.erb         # Страница результатов<br>
+                │   ├── registry.erb       # Страница регистра новорожденных<br>
+                │   ├── new_newborn.erb    # Форма добавления новорожденного<br>
+                │   ├── _edit_modal.erb    # Модальное окно редактирования<br>
+                │   └── reports.erb        # Страница отчетов<br>
+                │<br>
+                ├── app.rb                 # Основное приложение Sinatra<br>
+                ├── backup.rb              # Скрипт резервного копирования БД<br>
+                ├── config.ru              # Конфигурация для Rack<br>
+                └── README.md              # Это руководство
+            </div>
+        </section>
+
+        <section class="mb-5">
+            <h2 class="mb-3"><i class="bi bi-gear icon"></i>Детализация ключевых компонентов</h2>
+
+            <h3 class="mt-4">1. Основное приложение (app.rb)</h3>
+            <ul>
+                <li>Содержит все маршруты и бизнес-логику</li>
+                <li>Настройка БД: <code>set :database, { adapter: "sqlite3", database: "db/intergrowth.db" }</code></li>
+                <li>Основные маршруты:
+                    <ul>
+                        <li><code>/</code> - Главная страница с калькулятором</li>
+                        <li><code>/calculate</code> - Обработка данных плода</li>
+                        <li><code>/registry</code> - Управление регистром новорожденных</li>
+                        <li><code>/reports</code> - Генерация отчетов</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3 class="mt-4">2. Модели данных</h3>
+            <h4>measurement.rb:</h4>
+            <ul>
+                <li>Валидация данных плода (недели гестации 33-42, дни 0-6)</li>
+                <li>Метод <code>gestational_age</code> для форматированного вывода возраста</li>
+                <li>Логика расчета z-score и процентилей</li>
+            </ul>
+
+            <h4>newborn.rb:</h4>
+            <ul>
+                <li>Валидация данных новорожденного (ФИО, дата рождения и т.д.)</li>
+                <li>Методы:
+                    <ul>
+                        <li><code>full_name</code> - объединение ФИО</li>
+                        <li><code>bed_days</code> - расчет койко-дней</li>
+                        <li><code>apgar</code> - форматирование оценки по Апгар</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3 class="mt-4">3. Шаблоны (views)</h3>
+            <h4>layout.erb - Базовый каркас:</h4>
+            <ul>
+                <li>Подключает Bootstrap, Chart.js, иконки</li>
+                <li>Содержит навигационное меню</li>
+                <li>Включает встроенные:
+                    <ul>
+                        <li>Общие стили уведомлений</li>
+                        <li>Функцию <code>showToast()</code> для показа сообщений</li>
+                        <li>Контейнер для контента (<code>&lt;%= yield %&gt;</code>)</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h4>index.erb (Калькулятор):</h4>
+            <ul>
+                <li>Форма ввода данных плода</li>
+                <li>Встроенный JS для работы кнопок выбора:
+                    <pre>document.querySelectorAll('.gender-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        // Обработка выбора пола
+    });
+});</pre>
+                </li>
+                <li>Стили для формы прямо в шаблоне</li>
+            </ul>
+
+            <h4>result.erb (Результаты):</h4>
+            <ul>
+                <li>Отображение результатов расчета</li>
+                <li>Стили для печати (<code>@media print</code>)</li>
+                <li>JavaScript для инициализации графиков:
+                    <pre>const createPrecisionChart = (canvasId, chartData, title, unit) => {
+    // Сложная логика построения графиков с учетом дней гестации
+};</pre>
+                </li>
+                <li>Функция <code>printReport()</code> для генерации печатной версии</li>
+            </ul>
+
+            <h4>registry.erb (Регистр):</h4>
+            <ul>
+                <li>Таблица с данными новорожденных</li>
+                <li>Стили таблицы прямо в шаблоне:
+                    <pre>.clickable-row {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}</pre>
+                </li>
+                <li>JavaScript для:
+                    <ul>
+                        <li>Поиска по таблице</li>
+                        <li>Удаления записей</li>
+                        <li>Открытия модальных окон редактирования</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h4>_edit_modal.erb (Редактирование):</h4>
+            <ul>
+                <li>Компактные стили для модального окна
+                    <pre>.compact-modal {
+    max-width: 700px;
+    font-size: 0.875rem;
+}</pre>
+                </li>
+                <li>JavaScript для обработки формы редактирования:
+                    <pre>document.getElementById('editForm').addEventListener('submit', function(e) {
+    // AJAX-отправка формы
+});</pre>
+                </li>
+            </ul>
+
+            <h3 class="mt-4">4. Резервное копирование (backup.rb)</h3>
+            <ul>
+                <li>Автоматическое создание бэкапов БД</li>
+                <li>Хранение:
+                    <ul>
+                        <li>Ежедневных бэкапов (30 дней)</li>
+                        <li>Месячных бэкапов (12 месяцев)</li>
+                    </ul>
+                </li>
+                <li>Запуск: <code>ruby backup.rb</code></li>
+            </ul>
+        </section>
+
+        <section class="mb-5">
+            <h2 class="mb-3"><i class="bi bi-tools icon"></i>Технические особенности</h2>
+            <div class="note">
+                <h4>1. Стили и скрипты:</h4>
+                <ul>
+                    <li>Все CSS/JS встроены непосредственно в шаблоны</li>
+                    <li>Нет разделения на отдельные файлы</li>
+                    <li>Преимущество: всё в одном месте для каждой страницы</li>
+                </ul>
+            </div>
+
+            <div class="note">
+                <h4>2. Графики:</h4>
+                <ul>
+                    <li>Используется Chart.js с кастомной логикой позиционирования точек</li>
+                    <li>Учет дней гестации в отображении данных</li>
+                    <li>Специальная обработка для печатной версии</li>
+                </ul>
+            </div>
+
+            <div class="note">
+                <h4>3. Печать:</h4>
+                <ul>
+                    <li>Реализован специальный режим в result.erb</li>
+                    <li>Динамическое создание копий графиков для печати</li>
+                    <li>Стили <code>@media print</code> для оптимизации вывода</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="mb-5">
+            <h2 class="mb-3"><i class="bi bi-exclamation-triangle icon"></i>Типичные проблемы и решения</h2>
+
+            <div class="problem">
+                <h4>1. Не работают графики</h4>
+                <p>Проверьте:</p>
+                <ul>
+                    <li>Передаются ли данные из контроллера (<code>@weight_chart</code>, <code>@height_chart</code>, <code>@hc_chart</code>)</li>
+                    <li>Консоль браузера на наличие ошибок JavaScript</li>
+                    <li>Корректность данных в функции <code>createPrecisionChart()</code> (result.erb)</li>
+                </ul>
+            </div>
+
+            <div class="problem">
+                <h4>2. Проблемы со стилями</h4>
+                <p>Где искать:</p>
+                <ul>
+                    <li>Общие стили - layout.erb</li>
+                    <li>Стили конкретной страницы - в соответствующем .erb файле</li>
+                    <li>Стили печати - result.erb (секция <code>@media print</code>)</li>
+                </ul>
+            </div>
+
+            <div class="problem">
+                <h4>3. Ошибки валидации данных</h4>
+                <p>Проверьте:</p>
+                <ul>
+                    <li>Модели measurement.rb и newborn.rb</li>
+                    <li>Встроенные в формы сообщения об ошибках (например в new_newborn.erb)</li>
+                    <li>Логи сервера при отправке форм</li>
+                </ul>
+            </div>
+
+            <div class="problem">
+                <h4>4. Проблемы с модальными окнами</h4>
+                <p>Диагностика:</p>
+                <ul>
+                    <li>Проверьте JavaScript в registry.erb и _edit_modal.erb</li>
+                    <li>Убедитесь в корректности обработчиков событий</li>
+                    <li>Проверьте передачу данных в AJAX-запросах</li>
+                </ul>
+            </div>
+
+            <div class="problem">
+                <h4>5. Проблемы с БД</h4>
+                <p>Решение:</p>
+                <ul>
+                    <li>Проверьте наличие файла db/intergrowth.db</li>
+                    <li>Запустите скрипт резервного копирования</li>
+                    <li>Проверьте миграции (если используются)</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="mb-5">
+            <h2 class="mb-3"><i class="bi bi-lightbulb icon"></i>Рекомендации по разработке</h2>
+            <div class="solution">
+                <h4>1. Локализация проблемы:</h4>
+                <ul>
+                    <li>Проблемы с конкретной страницей → ищите в соответствующем .erb файле</li>
+                    <li>Общие проблемы → проверьте layout.erb и app.rb</li>
+                </ul>
+            </div>
+
+            <div class="solution">
+                <h4>2. Изменение стилей:</h4>
+                <ul>
+                    <li>Редактируйте CSS прямо в шаблоне страницы</li>
+                    <li>Для глобальных изменений меняйте layout.erb</li>
+                </ul>
+            </div>
+
+            <div class="solution">
+                <h4>3. Добавление функционала:</h4>
+                <ul>
+                    <li>Новые страницы - создавайте .erb файлы по аналогии</li>
+                    <li>JavaScript пишите прямо в шаблоне</li>
+                    <li>Новые маршруты добавляйте в app.rb</li>
+                </ul>
+            </div>
+
+        </section>
+
+        <section class="mb-5">
+            <h2 class="mb-3"><i class="bi bi-link icon"></i>Полезные ссылки</h2>
+            <ul>
+                <li><a href="https://sinatrarb.com/" target="_blank">Sinatra</a> - документация фреймворка</li>
+                <li><a href="https://www.chartjs.org/" target="_blank">Chart.js</a> - работа с графиками</li>
+                <li><a href="https://getbootstrap.com/" target="_blank">Bootstrap 5</a> - стилизация компонентов</li>
+                <li><a href="https://guides.rubyonrails.org/active_record_basics.html" target="_blank">ActiveRecord</a> - работа с БД</li>
+            </ul>
+            <p class="mt-3">Для углубленного понимания проекта изучайте комментарии в коде и историю изменений. Все ключевые компоненты системы находятся в указанных файлах, что упрощает навигацию по проекту.</p>
+        </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
