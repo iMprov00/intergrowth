@@ -83,7 +83,58 @@
                 <li>Ведение базы данных новорожденных</li>
                 <li>Все CSS/JS встроены непосредственно в шаблоны ERB</li>
             </ul>
+
+
+
+         <section class="mb-5">
+         
+            <div class="problem">
+                <h2 class="mb-3"><i class="bi bi-exclamation-triangle icon"></i>Перед любым редактированием сайта обязательно сделай бэкап базы данных!</h2>
+
+                <ul>
+                    <li>Запустить Far Manager или просто командную строку</li>
+                    <li>Перейти по пути <i><b>C:\DAR\intergrowth></b></i></li>
+                    <li>Ввести <i><b>ruby backup.rb</b></i></li>
+                    <li>После чего бэкап появиться по пути <i><b>C:\DAR\intergrowth\db\backup</b></i></li>
+                    <br><hr>
+                    <li>Чтобы восстановить БД, скопируй файл бэкапа с заменой в путь <i><b>C:\DAR\intergrowth\db</b></i>
+                    <li>Бэкап создается автоматически каждый день в 8:05, задача в планировщике <i><b>Backup DAR (AFO)</b></i>
+                </ul>
+
+            </div>
+
         </section>
+
+        <section>
+            <h2 class="mb-3"><i class="bi bi-question-circle icon"></i>Как запустить?</h2>
+                <ul>
+                    <li>Запустить Far Manager или просто командную строку</li>
+                    <li>Перейти по пути <i><b>C:\DAR\intergrowth></b></i></li>
+                    <li>Ввести <i><b>start ruby app.rb -o 0.0.0.0 -p 4568</b></i> (или стандартный порт 4567, но на текущий момент на нем крутится госпитализация)</li>
+                </ul>
+        </section>
+
+        <section>
+            <h2 class="mb-3"><i class="bi bi-question-circle icon"></i>Как откатиться к рабочей версии?</h2>
+                <ul>
+                    <li>Запустить Far Manager или просто командную строку</li>
+                    <li>Перейти по пути <i><b>C:\DAR\intergrowth></b></i></li>
+                    <li>Ввести <i><b>git restore</b></i></li>
+                </ul>
+        </section>
+
+        <section>
+            <h2 class="mb-3"><i class="bi bi-question-circle icon"></i>Как установить проект снова?</h2>
+                <ul>
+                    <li>Запустить Far Manager или просто командную строку</li>
+                    <li>Перейти по пути <i><b>C:\DAR\</b></i></li>
+                    <li>Ввести <i><b>git clone <a href="https://github.com/iMprov00/intergrowth.git">https://github.com/iMprov00/intergrowth.git</a></b></i> или перейти по ссылке и скачать</li>
+                    <li>Перейти по пути <i><b>C:\DAR\intergrowth></b></i></li>
+                    <li>Ввести <i><b>rake db:create</b></i> после <i><b>rake db:migrate</b></i></li>
+                </ul>
+        </section>
+
+<hr>
 
         <section class="mb-5">
             <h2 class="mb-3"><i class="bi bi-folder icon"></i>Структура проекта</h2>
@@ -114,7 +165,7 @@
                 │   ├── _edit_modal.erb    # Модальное окно редактирования<br>
                 │   └── reports.erb        # Страница отчетов<br>
                 │<br>
-                ├── app.rb                 # Основное приложение Sinatra<br>
+                ├── app.rb                 # Основное приложение<br>
                 ├── backup.rb              # Скрипт резервного копирования БД<br>
                 ├── config.ru              # Конфигурация для Rack<br>
                 └── README.md              # Это руководство
