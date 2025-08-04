@@ -1,12 +1,21 @@
-require 'sinatra'
-require 'sinatra/activerecord'
-require './app/models/measurement'
-require './app/models/newborn'
+# ======================================
+# 1. ПОДКЛЮЧЕНИЕ БИБЛИОТЕК И МОДЕЛЕЙ
+# ======================================
+require 'sinatra'           # Веб-фреймворк
+require 'sinatra/activerecord' # Интеграция ActiveRecord
+require './app/models/measurement' # Модель измерений
+require './app/models/newborn'     # Модель новорожденных
 
-# Настройка БД
+# ======================================
+# 2. НАСТРОЙКА БАЗЫ ДАННЫХ
+# ======================================
+# Используем SQLite3 базу данных
 set :database, { adapter: "sqlite3", database: "db/intergrowth.db" }
 
-# Точные стандарты INTERGROWTH-21st для мальчиков
+# ======================================
+# 3. СТАНДАРТЫ INTERGROWTH-21st
+# ======================================
+# Стандарты для мальчиков (недели гестации => процентили)
 BOYS_STANDARDS = {
   weight: {
     # Неделя => [3rd, 5th, 10th, 50th, 90th, 95th, 97th]
@@ -88,6 +97,9 @@ GIRLS_STANDARDS = {
   }
 }
 
+# ======================================
+# 4. ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
+# ======================================
 # Расчет z-score и процентиля
 def calculate_z_score(value, median, variation)
   (value - median) / variation
@@ -177,12 +189,25 @@ def get_color(percentile)
   end
 end
 
+
+# ======================================
+# 5. ОСНОВНЫЕ МАРШРУТЫ ПРИЛОЖЕНИЯ
+# ======================================
+
+# -----------------
+# 5.1 Главная страница
+# -----------------
+
 # Маршруты
 get '/' do
     @title = "Калькулятор роста плода INTERGROWTH-21st"
   erb :index
 end
 
+
+# -----------------
+# 5.2 Расчет показателей
+# -----------------
 post '/calculate' do
   gestational_week = params[:gestational_weeks].to_i
   gestational_day = params[:gestational_days].to_i
@@ -232,51 +257,13 @@ post '/calculate' do
   erb :result
 end
 
-helpers do
-  def physical_development_assessment(weight, weight_percentile, height_percentile)
-    # Сначала проверяем условия по весу (приоритетные)
-    if weight >= 5000
-      { category: "5. Гигантский к сроку гестации", 
-        alert: "danger" }
-    elsif weight >= 4500
-      { category: "4. Чрезмерно крупный к сроку гестации", 
-        alert: "danger" }
-    elsif weight_percentile >= 97 && height_percentile >= 10
-      { category: "3. Высокое, крупный к сроку гестации", 
-        alert: "danger" }
-    elsif weight_percentile >= 90 && weight_percentile < 97 && height_percentile >= 10
-      { category: "2. Выше среднего, крупный к сроку гестации", 
-        alert: "warning" }
-    elsif weight_percentile >= 10 && weight_percentile < 90
-      { category: "1. Среднее", 
-        alert: "success" }
-    elsif weight_percentile >= 3 && weight_percentile < 10
-      # Для пунктов 6 и 7 сначала проверяем вес
-      if height_percentile < 10
-        { category: "7. Ниже среднего, малый к сроку гестации", 
-          alert: "danger" }
-      else
-        { category: "6. Ниже среднего, маловесный к сроку гестации", 
-          alert: "warning" }
-      end
-    elsif weight_percentile < 3
-      # Для пунктов 8 и 9 сначала проверяем вес
-      if height_percentile < 10
-        { category: "9. Низкое, малый к сроку гестации", 
-          alert: "danger" }
-      else
-        { category: "8. Низкое, маловесный к сроку гестации", 
-          alert: "danger" }
-      end
-    else
-      # Запасной вариант (не должен достигатьcя при правильных данных)
-      { category: "1. Среднее", 
-        alert: "success" }
-    end
-  end
-end
+# ======================================
+# 6. РЕГИСТР НОВОРОЖДЕННЫХ
+# ======================================
 
-
+# -----------------
+# 6.1 Просмотр регистра
+# -----------------
 
 # Маршруты для регистра
 get '/registry' do
@@ -296,10 +283,18 @@ end
   erb :registry
 end
 
+# -----------------
+# 6.2 Добавление новорожденного
+# -----------------
+
 get '/registry/new' do
   @newborn = Newborn.new
   erb :new_newborn
 end
+
+# -----------------
+# 6.3 Редактирование/удаление
+# -----------------
 
 post '/registry' do
   # Преобразуем параметры
@@ -372,10 +367,61 @@ end
 
 
 
-
+# ======================================
+# 7. ОТЧЕТЫ
+# ======================================
 
 get '/reports' do  
 
   erb :reports
 
+end
+
+
+# ======================================
+# 8. HELPERS (ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ДЛЯ VIEW)
+# ======================================
+
+helpers do
+  def physical_development_assessment(weight, weight_percentile, height_percentile)
+    # Сначала проверяем условия по весу (приоритетные)
+    if weight >= 5000
+      { category: "5. Гигантский к сроку гестации", 
+        alert: "danger" }
+    elsif weight >= 4500
+      { category: "4. Чрезмерно крупный к сроку гестации", 
+        alert: "danger" }
+    elsif weight_percentile >= 97 && height_percentile >= 10
+      { category: "3. Высокое, крупный к сроку гестации", 
+        alert: "danger" }
+    elsif weight_percentile >= 90 && weight_percentile < 97 && height_percentile >= 10
+      { category: "2. Выше среднего, крупный к сроку гестации", 
+        alert: "warning" }
+    elsif weight_percentile >= 10 && weight_percentile < 90
+      { category: "1. Среднее", 
+        alert: "success" }
+    elsif weight_percentile >= 3 && weight_percentile < 10
+      # Для пунктов 6 и 7 сначала проверяем вес
+      if height_percentile < 10
+        { category: "7. Ниже среднего, малый к сроку гестации", 
+          alert: "danger" }
+      else
+        { category: "6. Ниже среднего, маловесный к сроку гестации", 
+          alert: "warning" }
+      end
+    elsif weight_percentile < 3
+      # Для пунктов 8 и 9 сначала проверяем вес
+      if height_percentile < 10
+        { category: "9. Низкое, малый к сроку гестации", 
+          alert: "danger" }
+      else
+        { category: "8. Низкое, маловесный к сроку гестации", 
+          alert: "danger" }
+      end
+    else
+      # Запасной вариант (не должен достигатьcя при правильных данных)
+      { category: "1. Среднее", 
+        alert: "success" }
+    end
+  end
 end
