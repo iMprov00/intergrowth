@@ -382,3 +382,38 @@ btn-group {
   min-width: 120% !important;
 }
 
+/* Стили для отчетов */
+.report-table th {
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  background: #f8f9fa;
+  z-index: 10;
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
+}
+
+.report-summary-card {
+  border-left: 4px solid #4e73df;
+  background-color: #f8f9fa;
+}
+
+.report-alert {
+  border-left: 4px solid;
+}
+
+.report-alert.alert-info {
+  border-left-color: #36b9cc;
+}
+
+.report-alert.alert-warning {
+  border-left-color: #f6c23e;
+}
+
+.report-alert.alert-danger {
+  border-left-color: #e74a3b;
+}

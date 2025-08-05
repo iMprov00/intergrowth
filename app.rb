@@ -1,7 +1,8 @@
 # ======================================
 # 1. ПОДКЛЮЧЕНИЕ БИБЛИОТЕК И МОДЕЛЕЙ
 # ======================================
-require 'sinatra'           # Веб-фреймворк
+require 'sinatra' # Веб-фреймворк
+         
 require 'sinatra/activerecord' # Интеграция ActiveRecord
 require './app/models/measurement' # Модель измерений
 require './app/models/newborn'     # Модель новорожденных
@@ -378,6 +379,40 @@ get '/reports' do
 
   erb :reports
 
+end
+
+# Маршрут для генерации отчетов
+post '/generate_report' do
+  start_date = params[:start_date] ? Date.parse(params[:start_date]) : Date.today.beginning_of_month
+  end_date = params[:end_date] ? Date.parse(params[:end_date]) : Date.today.end_of_month
+  report_type = params[:report_type]
+  
+  @newborns = Newborn.where(birth_date: start_date..end_date)
+  
+  case report_type
+  when 'general'    # Общий отчет
+    erb :_general_report, layout: false
+  when 'weight'    # По весу
+    erb :_weight_report, layout: false
+  when 'gestational' # По сроку гестации
+    erb :_gestational_report, layout: false
+  when 'feeding'   # По вскармливанию
+    erb :_feeding_report, layout: false
+  when 'apgar'     # По оценке Апгар
+    erb :_apgar_report, layout: false
+  when 'delivery'  # По способу родоразрешения
+    erb :_delivery_report, layout: false
+  when 'outcome'   # По исходам
+    erb :_outcome_report, layout: false
+  when 'comorbid'  # По сопутствующей патологии
+    erb :_comorbid_report, layout: false
+  when 'hiv'       # По ВИЧ-статусу
+    erb :_hiv_report, layout: false
+  when 'vaccination' # По вакцинации
+    erb :_vaccination_report, layout: false
+  else
+    "Неизвестный тип отчета"
+  end
 end
 
 

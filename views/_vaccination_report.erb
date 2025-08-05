@@ -1,0 +1,61 @@
+<%
+  bcg_stats = @newborns.group(:bcg).count
+  hepatitis_stats = @newborns.group(:hepatitis_b).count
+  total = @newborns.count
+%>
+
+<div class="row">
+  <div class="col-md-6">
+    <h5>Вакцинация БЦЖ</h5>
+    <table class="table table-bordered mb-4">
+      <thead class="table-dark">
+        <tr>
+          <th>Статус</th>
+          <th>Количество</th>
+          <th>%</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% bcg_stats.each do |bcg, count| %>
+          <tr>
+            <td><%= bcg || 'Не указано' %></td>
+            <td><%= count %></td>
+            <td><%= (count.to_f / total * 100).round(1) %>%</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-md-6">
+    <h5>Вакцинация от гепатита B</h5>
+    <table class="table table-bordered">
+      <thead class="table-dark">
+        <tr>
+          <th>Статус</th>
+          <th>Количество</th>
+          <th>%</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% hepatitis_stats.each do |hep, count| %>
+          <tr>
+            <td><%= hep || 'Не указано' %></td>
+            <td><%= count %></td>
+            <td><%= (count.to_f / total * 100).round(1) %>%</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-md-12">
+    <div class="alert alert-info">
+      <h5><i class="bi bi-info-circle"></i> Общая статистика вакцинации</h5>
+      <p>Всего новорожденных: <strong><%= total %></strong></p>
+      <p>Получили БЦЖ: <strong><%= bcg_stats['Да'] || 0 %> (<%= ((bcg_stats['Да'] || 0).to_f / total * 100).round(1) %>%)</strong></p>
+      <p>Получили вакцину от гепатита B: <strong><%= hepatitis_stats['Да'] || 0 %> (<%= ((hepatitis_stats['Да'] || 0).to_f / total * 100).round(1) %>%)</strong></p>
+    </div>
+  </div>
+</div>

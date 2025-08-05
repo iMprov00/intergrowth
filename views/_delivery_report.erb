@@ -1,0 +1,65 @@
+<%
+  delivery_stats = @newborns.group(:delivery_method).count
+  total = @newborns.count
+%>
+
+<div class="row">
+  <div class="col-md-6">
+    <table class="table table-bordered">
+      <thead class="table-dark">
+        <tr>
+          <th>Способ родоразрешения</th>
+          <th>Количество</th>
+          <th>%</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% delivery_stats.each do |method, count| %>
+          <tr>
+            <td><%= method == 'КС' ? 'Кесарево сечение' : 'Самопроизвольные роды' %></td>
+            <td><%= count %></td>
+            <td><%= (count.to_f / total * 100).round(1) %>%</td>
+          </tr>
+        <% end %>
+        <tr class="table-secondary">
+          <td><strong>Всего</strong></td>
+          <td><strong><%= total %></strong></td>
+          <td><strong>100%</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-md-6">
+    <canvas id="deliveryChart" height="250"></canvas>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const ctx = document.getElementById('deliveryChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: <%= delivery_stats.keys.map { |k| k == 'КС' ? 'Кесарево сечение' : 'Самопроизвольные роды' }.to_json %>,
+      datasets: [{
+        label: 'Количество',
+        data: <%= delivery_stats.values.to_json %>,
+        backgroundColor: ['#4e73df', '#1cc88a']
+      }]
+    },
+    options: {
+      plugins: {
+        title: {
+          display: true,
+          text: 'Способы родоразрешения'
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+});
+</script>

@@ -1,0 +1,40 @@
+<%
+  hiv_stats = @newborns.group(:hiv).count
+  total = @newborns.count
+%>
+
+<div class="row">
+  <div class="col-md-6">
+    <table class="table table-bordered">
+      <thead class="table-dark">
+        <tr>
+          <th>ВИЧ-статус</th>
+          <th>Количество</th>
+          <th>%</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% hiv_stats.each do |hiv, count| %>
+          <tr>
+            <td><%= hiv || 'Не указано' %></td>
+            <td><%= count %></td>
+            <td><%= (count.to_f / total * 100).round(1) %>%</td>
+          </tr>
+        <% end %>
+        <tr class="table-secondary">
+          <td><strong>Всего</strong></td>
+          <td><strong><%= total %></strong></td>
+          <td><strong>100%</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-md-6">
+    <div class="alert alert-warning">
+      <h5><i class="bi bi-exclamation-triangle"></i> Внимание!</h5>
+      <p>Данные по ВИЧ-статусу требуют особого внимания и конфиденциальности.</p>
+      <p>Всего обследовано: <strong><%= total %></strong></p>
+      <p>Положительных результатов: <strong><%= hiv_stats['Да'] || 0 %> (<%= ((hiv_stats['Да'] || 0).to_f / total * 100).round(1) %>%)</strong></p>
+    </div>
+  </div>
+</div>

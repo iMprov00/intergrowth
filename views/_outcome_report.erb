@@ -1,0 +1,44 @@
+<%
+  outcome_stats = @newborns.group(:outcome).count
+  total = @newborns.count
+%>
+
+<div class="row">
+  <div class="col-md-6">
+    <table class="table table-bordered">
+      <thead class="table-dark">
+        <tr>
+          <th>Исход</th>
+          <th>Количество</th>
+          <th>%</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% outcome_stats.each do |outcome, count| %>
+          <tr>
+            <td><%= outcome || 'Не указано' %></td>
+            <td><%= count %></td>
+            <td><%= (count.to_f / total * 100).round(1) %>%</td>
+          </tr>
+        <% end %>
+        <tr class="table-secondary">
+          <td><strong>Всего</strong></td>
+          <td><strong><%= total %></strong></td>
+          <td><strong>100%</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-md-6">
+    <div class="alert alert-info">
+      <h5><i class="bi bi-info-circle"></i> Статистика исходов</h5>
+      <p>Всего новорожденных: <strong><%= total %></strong></p>
+      <% if outcome_stats['Выписан'] %>
+        <p>Успешно выписаны: <strong><%= outcome_stats['Выписан'] %> (<%= (outcome_stats['Выписан'].to_f / total * 100).round(1) %>%)</strong></p>
+      <% end %>
+      <% if outcome_stats['Переведен'] %>
+        <p>Переведены в другие отделения: <strong><%= outcome_stats['Переведен'] %> (<%= (outcome_stats['Переведен'].to_f / total * 100).round(1) %>%)</strong></p>
+      <% end %>
+    </div>
+  </div>
+</div>

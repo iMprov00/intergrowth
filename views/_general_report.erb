@@ -1,0 +1,28 @@
+<table class="table table-striped table-bordered">
+  <thead class="table-dark">
+    <tr>
+      <th>ФИО</th>
+      <th>Дата рождения</th>
+      <th>Пол</th>
+      <th>Вес при рожд. (г)</th>
+      <th>Вес при вып. (г)</th>
+      <th>Рост (см)</th>
+      <th>Апгар</th>
+      <th>Вскармливание</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @newborns.each do |n| %>
+      <tr>
+        <td><%= n.full_name %></td>
+        <td><%= n.birth_date.strftime('%d.%m.%Y') %></td>
+        <td><%= n.gender == 'M' ? 'М' : 'Ж' %></td>
+        <td><%= n.birth_weight %></td>
+        <td><%= n.discharge_weight %></td>
+        <td><%= n.birth_height %></td>
+        <td><%= n.apgar %></td>
+        <td><%= n.feeding %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

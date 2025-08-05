@@ -1,0 +1,80 @@
+<%
+  gestational_stats = @newborns.group(:gestational_age).count
+  total = @newborns.count
+%>
+
+<div class="row">
+  <div class="col-md-6">
+    <table class="table table-bordered">
+      <thead class="table-dark">
+        <tr>
+          <th>Срок гестации (недели)</th>
+          <th>Количество</th>
+          <th>%</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% gestational_stats.sort.each do |weeks, count| %>
+          <tr>
+            <td><%= weeks ? "%.1f" % weeks : "Не указано" %></td>
+            <td><%= count %></td>
+            <td><%= (count.to_f / total * 100).round(1) %>%</td>
+          </tr>
+        <% end %>
+        <tr class="table-secondary">
+          <td><strong>Всего</strong></td>
+          <td><strong><%= total %></strong></td>
+          <td><strong>100%</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-md-6">
+    <canvas id="gestationalChart" height="250"></canvas>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const ctx = document.getElementById('gestationalChart').getContext('2d');
+  
+  // Заменяем raw на прямое использование to_json
+  const labels = <%= gestational_stats.keys.sort.map { |k| k ? "%.1f" % k : "Не указано" }.to_json %>;
+  const data = <%= gestational_stats.keys.sort.map { |k| gestational_stats[k] }.to_json %>;
+  
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Количество новорожденных',
+        data: data,
+        backgroundColor: '#4e73df'
+      }]
+    },
+    options: {
+      plugins: {
+        title: {
+          display: true,
+          text: 'Распределение по сроку гестации'
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Количество'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Недели гестации'
+          }
+        }
+      }
+    }
+  });
+});
+</script>

@@ -1,0 +1,59 @@
+<%
+  feeding_stats = @newborns.group(:feeding).count
+  total = @newborns.count
+%>
+
+<div class="row">
+  <div class="col-md-6">
+    <table class="table table-bordered">
+      <thead class="table-dark">
+        <tr>
+          <th>Тип вскармливания</th>
+          <th>Количество</th>
+          <th>%</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% feeding_stats.each do |feeding, count| %>
+          <tr>
+            <td><%= feeding || 'Не указано' %></td>
+            <td><%= count %></td>
+            <td><%= (count.to_f / total * 100).round(1) %>%</td>
+          </tr>
+        <% end %>
+        <tr class="table-secondary">
+          <td><strong>Всего</strong></td>
+          <td><strong><%= total %></strong></td>
+          <td><strong>100%</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-md-6">
+    <canvas id="feedingChart" height="250"></canvas>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const ctx = document.getElementById('feedingChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: <%= feeding_stats.keys.map { |k| k || 'Не указано' }.to_json %>,
+      datasets: [{
+        data: <%= feeding_stats.values.to_json %>,
+        backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc']
+      }]
+    },
+    options: {
+      plugins: {
+        title: {
+          display: true,
+          text: 'Типы вскармливания'
+        }
+      }
+    }
+  });
+});
+</script>

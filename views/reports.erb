@@ -1,1 +1,127 @@
-<h1>НЕ НАДО СЮДА ЖМАВ, ЕЩЁ НЕ РАБОТАЕТ!</h1>
+<div class="card">
+  <div class="card-header">
+    <h5><i class="bi bi-file-earmark-bar-graph me-2"></i>Генерация отчетов</h5>
+  </div>
+  <div class="card-body">
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <label class="form-label">Период с:</label>
+        <input type="date" id="startDate" class="form-control" value="<%= Date.today.beginning_of_month.strftime('%Y-%m-%d') %>">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">по:</label>
+        <input type="date" id="endDate" class="form-control" value="<%= Date.today.end_of_month.strftime('%Y-%m-%d') %>">
+      </div>
+    </div>
+    
+    <div class="row mb-4">
+      <div class="col-md-12">
+        <h5>Тип отчета:</h5>
+		<div class="btn-group w-100 mb-3" role="group">
+		  <button type="button" class="btn btn-outline-primary report-type active" data-type="general">
+		    <i class="bi bi-card-list"></i> Общий
+		  </button>
+		  <button type="button" class="btn btn-outline-primary report-type" data-type="weight">
+		    <i class="bi bi-speedometer2"></i> Вес
+		  </button>
+		  <button type="button" class="btn btn-outline-primary report-type" data-type="gestational">
+		    <i class="bi bi-calendar-week"></i> Срок гестации
+		  </button>
+		</div>
+
+		<div class="btn-group w-100 mb-3" role="group">
+		  <button type="button" class="btn btn-outline-primary report-type" data-type="feeding">
+		    <i class="bi bi-cup-straw"></i> Вскармливание
+		  </button>
+		  <button type="button" class="btn btn-outline-primary report-type" data-type="apgar">
+		    <i class="bi bi-heart-pulse"></i> Апгар
+		  </button>
+		  <button type="button" class="btn btn-outline-primary report-type" data-type="delivery">
+		    <i class="bi bi-hospital"></i> Родоразрешение
+		  </button>
+		</div>
+
+		<div class="btn-group w-100 mb-3" role="group">
+		  <button type="button" class="btn btn-outline-primary report-type" data-type="outcome">
+		    <i class="bi bi-clipboard2-pulse"></i> Исходы
+		  </button>
+		  <button type="button" class="btn btn-outline-primary report-type" data-type="comorbid">
+		    <i class="bi bi-file-medical"></i> Патологии
+		  </button>
+		  <button type="button" class="btn btn-outline-primary report-type" data-type="hiv">
+		    <i class="bi bi-shield-exclamation"></i> ВИЧ
+		  </button>
+		</div>
+
+		<div class="btn-group w-100" role="group">
+		  <button type="button" class="btn btn-outline-primary report-type" data-type="vaccination">
+		    <i class="bi bi-eyedropper"></i> Вакцинация
+		  </button>
+		</div>
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-md-12">
+        <button id="generateReport" class="btn btn-main me-2">
+          <i class="bi bi-file-earmark-text"></i> Сформировать отчет
+        </button>
+        <button id="exportExcel" class="btn btn-success">
+          <i class="bi bi-file-earmark-excel"></i> Экспорт в Excel
+        </button>
+      </div>
+    </div>
+    
+    <div class="row mt-4">
+      <div class="col-md-12">
+        <div id="reportContainer" class="table-responsive">
+          <!-- Здесь будет отображаться отчет -->
+          <div class="alert alert-info">
+            Выберите параметры и нажмите "Сформировать отчет"
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  let currentReportType = 'general';
+  
+  // Обработка выбора типа отчета
+  document.querySelectorAll('.report-type').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.report-type').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      currentReportType = this.dataset.type;
+    });
+  });
+  
+  // Генерация отчета
+  document.getElementById('generateReport').addEventListener('click', function() {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    
+    fetch('/generate_report', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: `start_date=${startDate}&end_date=${endDate}&report_type=${currentReportType}`
+    })
+    .then(response => response.text())
+    .then(html => {
+      document.getElementById('reportContainer').innerHTML = html;
+    });
+  });
+  
+  // Экспорт в Excel
+  document.getElementById('exportExcel').addEventListener('click', function() {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    
+    window.location.href = `/export_excel?start_date=${startDate}&end_date=${endDate}&report_type=${currentReportType}`;
+  });
+});
+</script>

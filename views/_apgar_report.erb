@@ -1,0 +1,67 @@
+<%
+  apgar1_stats = @newborns.group(:apgar_1).count
+  apgar5_stats = @newborns.group(:apgar_5).count
+  total = @newborns.count
+%>
+
+<div class="row">
+  <div class="col-md-6">
+    <h5>Апгар на 1-й минуте</h5>
+    <table class="table table-bordered mb-4">
+      <thead class="table-dark">
+        <tr>
+          <th>Баллы</th>
+          <th>Количество</th>
+          <th>%</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% (0..10).each do |score| %>
+          <% if apgar1_stats[score] %>
+            <tr>
+              <td><%= score %></td>
+              <td><%= apgar1_stats[score] %></td>
+              <td><%= (apgar1_stats[score].to_f / total * 100).round(1) %>%</td>
+            </tr>
+          <% end %>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-md-6">
+    <h5>Апгар на 5-й минуте</h5>
+    <table class="table table-bordered">
+      <thead class="table-dark">
+        <tr>
+          <th>Баллы</th>
+          <th>Количество</th>
+          <th>%</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% (0..10).each do |score| %>
+          <% if apgar5_stats[score] %>
+            <tr>
+              <td><%= score %></td>
+              <td><%= apgar5_stats[score] %></td>
+              <td><%= (apgar5_stats[score].to_f / total * 100).round(1) %>%</td>
+            </tr>
+          <% end %>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-md-12">
+    <div class="alert alert-info">
+      <h5><i class="bi bi-info-circle"></i> Интерпретация оценки Апгар</h5>
+      <ul>
+        <li><strong>7-10 баллов</strong> - нормальное состояние</li>
+        <li><strong>4-6 баллов</strong> - средние нарушения</li>
+        <li><strong>0-3 балла</strong> - тяжелые нарушения</li>
+      </ul>
+    </div>
+  </div>
+</div>

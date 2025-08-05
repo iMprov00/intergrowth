@@ -1,0 +1,42 @@
+<table class="table table-striped table-bordered">
+  <thead class="table-dark">
+    <tr>
+      <th>ФИО</th>
+      <th>Дата рождения</th>
+      <th>Вес при рожд. (г)</th>
+      <th>Вес при вып. (г)</th>
+      <th>Разница (г)</th>
+      <th>% изменения</th>
+      <th>Категория</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @newborns.each do |n| %>
+      <% if n.birth_weight && n.discharge_weight %>
+        <% diff = n.discharge_weight - n.birth_weight %>
+        <% percent = (diff / n.birth_weight * 100).round(1) %>
+        <tr>
+          <td><%= n.full_name %></td>
+          <td><%= n.birth_date.strftime('%d.%m.%Y') %></td>
+          <td><%= n.birth_weight %></td>
+          <td><%= n.discharge_weight %></td>
+          <td class="<%= diff > 0 ? 'text-success' : 'text-danger' %>">
+            <%= diff > 0 ? "+#{diff.round(1)}" : diff.round(1) %>
+          </td>
+          <td class="<%= percent > 0 ? 'text-success' : 'text-danger' %>">
+            <%= percent > 0 ? "+#{percent}%" : "#{percent}%" %>
+          </td>
+          <td>
+            <% if n.birth_weight < 2500 %>
+              <span class="badge bg-warning">Низкий вес</span>
+            <% elsif n.birth_weight > 4000 %>
+              <span class="badge bg-danger">Крупный плод</span>
+            <% else %>
+              <span class="badge bg-success">Норма</span>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    <% end %>
+  </tbody>
+</table>

@@ -1,0 +1,47 @@
+<%
+  # Группируем по сопутствующим заболеваниям
+  comorbid_stats = @newborns.where.not(comorbidities: nil).group(:comorbidities).count
+  total_with_comorbid = @newborns.where.not(comorbidities: nil).count
+  total = @newborns.count
+%>
+
+<div class="row">
+  <div class="col-md-6">
+    <table class="table table-bordered">
+      <thead class="table-dark">
+        <tr>
+          <th>Сопутствующая патология</th>
+          <th>Количество</th>
+          <th>% от всех</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% comorbid_stats.each do |comorbid, count| %>
+          <tr>
+            <td><%= comorbid %></td>
+            <td><%= count %></td>
+            <td><%= (count.to_f / total * 100).round(1) %>%</td>
+          </tr>
+        <% end %>
+        <tr class="table-secondary">
+          <td><strong>Всего с патологией</strong></td>
+          <td><strong><%= total_with_comorbid %></strong></td>
+          <td><strong><%= (total_with_comorbid.to_f / total * 100).round(1) %>%</strong></td>
+        </tr>
+        <tr>
+          <td>Без патологии</td>
+          <td><%= total - total_with_comorbid %></td>
+          <td><%= ((total - total_with_comorbid).to_f / total * 100).round(1) %>%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-md-6">
+    <div class="alert alert-info">
+      <h5><i class="bi bi-info-circle"></i> Статистика по сопутствующей патологии</h5>
+      <p>Всего новорожденных: <strong><%= total %></strong></p>
+      <p>С патологией: <strong><%= total_with_comorbid %> (<%= (total_with_comorbid.to_f / total * 100).round(1) %>%)</strong></p>
+      <p>Без патологии: <strong><%= total - total_with_comorbid %> (<%= ((total - total_with_comorbid).to_f / total * 100).round(1) %>%)</strong></p>
+    </div>
+  </div>
+</div>
