@@ -137,13 +137,16 @@ end
 
 def generate_growth_chart(measurement_type, user_value, gestational_week, gestational_day, gender)
   standards = gender == 'M' ? BOYS_STANDARDS : GIRLS_STANDARDS
-  percentiles = [3, 10, 25, 50, 75, 90, 97]
+  # Убрали 25 и 75 перцентили, оставили только 3, 10, 50, 90, 97
+  percentiles = [3, 10, 50, 90, 97]
+  # Соответствующие индексы в массивах стандартов (теперь они короче)
+  percentile_indices = [0, 1, 3, 4, 5] # 3rd, 10th, 50th, 90th, 97th
   datasets = []
   
   # Генерация кривых процентилей
   percentiles.each_with_index do |p, idx|
     data_points = (33..42).map do |week|
-      standards[measurement_type][week] ? standards[measurement_type][week][idx] : nil
+      standards[measurement_type][week] ? standards[measurement_type][week][percentile_indices[idx]] : nil
     end
     
     datasets << {
@@ -185,7 +188,7 @@ def get_color(percentile)
   when 50 then '#388e3c' # зеленый
   when 3, 97 then '#d32f2f' # красный
   when 10, 90 then '#1976d2' # синий
-  else '#9c27b0' # фиолетовый
+  else '#9c27b0' # фиолетовый (теперь не будет использоваться)
   end
 end
 
