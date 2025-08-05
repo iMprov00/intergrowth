@@ -113,8 +113,81 @@
   }
 </script>
 
-<!-- Пасхалка -->
 
+<!-- Пасхалка -->
+<script>
+  // Функция для показа пасхалки
+  function showEasterEgg() {
+    const easterEgg = document.createElement('div');
+    easterEgg.style.position = 'fixed';
+    easterEgg.style.bottom = '-300px';
+    easterEgg.style.right = '20px';
+    easterEgg.style.width = '250px';
+    easterEgg.style.height = '250px';
+    easterEgg.style.backgroundImage = 'url(/images/easter-egg.png)';
+    easterEgg.style.backgroundSize = 'contain';
+    easterEgg.style.backgroundRepeat = 'no-repeat';
+    easterEgg.style.transition = 'bottom 0.5s ease-in-out';
+    easterEgg.style.zIndex = '9999';
+    easterEgg.style.cursor = 'pointer';
+    
+    document.body.appendChild(easterEgg);
+    
+    // Плавное появление
+    setTimeout(() => {
+      easterEgg.style.bottom = '20px';
+    }, 100);
+    
+    // Плавное исчезновение при клике
+    easterEgg.addEventListener('click', () => {
+      easterEgg.style.bottom = '-300px';
+      setTimeout(() => {
+        document.body.removeChild(easterEgg);
+      }, 500);
+    });
+    
+
+  }
+
+  // Подсчет кликов
+document.addEventListener('DOMContentLoaded', () => {
+    // Получаем текущее количество кликов из localStorage
+    let clickCount = parseInt(localStorage.getItem('easterEggClickCount')) || 0;
+    
+    // Обработчик кликов по всему документу
+    document.addEventListener('click', () => {
+        // Проверяем, достигли ли 100 кликов ДО увеличения счетчика
+        if (clickCount >= 99) { // Проверяем 99, так как ниже мы увеличим до 100
+            showEasterEgg();
+            // Сбрасываем счетчик
+            clickCount = 0;
+            localStorage.setItem('easterEggClickCount', clickCount);
+            return; // Выходим, чтобы не увеличивать счетчик
+        }
+        
+        // Увеличиваем счетчик только если не достигли предела
+        clickCount++;
+        localStorage.setItem('easterEggClickCount', clickCount);
+    });
+});
+</script>
+
+<style> .easter-egg {
+  position: fixed;
+  bottom: -300px;
+  right: 20px;
+  width: 250px;
+  height: 250px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  transition: bottom 0.5s ease-in-out;
+  z-index: 9999;
+  cursor: pointer;
+}
+
+.easter-egg.visible {
+  bottom: 20px;
+}</style>
 <!---->
 
 
