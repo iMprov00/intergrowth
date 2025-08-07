@@ -423,10 +423,10 @@ end
 helpers do
   def physical_development_assessment(weight, weight_percentile, height_percentile)
     # Сначала проверяем условия по весу (приоритетные)
-    if weight >= 5000
+    if weight >= 5.0
       { category: "5. Гигантский к сроку гестации", 
         alert: "danger" }
-    elsif weight >= 4500
+    elsif weight >= 4.5
       { category: "4. Чрезмерно крупный к сроку гестации", 
         alert: "danger" }
     elsif weight_percentile >= 97 && height_percentile >= 10
